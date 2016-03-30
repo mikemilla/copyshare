@@ -1,13 +1,16 @@
 package com.mikemilla.copyshare;
 
-import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -16,6 +19,7 @@ public class ShareActivity extends AppCompatActivity {
     private Animation slideUp, slideDown, fadeIn, fadeOut;
     private LinearLayout mShareSheet;
     private View mBackgroundView;
+    private BottomSheetBehavior<FrameLayout> mBottomSheetBehavior;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,104 +29,77 @@ public class ShareActivity extends AppCompatActivity {
         // Load the animations
         createAnimations();
 
-        // Check if the version of Android is Lollipop or higher
-        if (Build.VERSION.SDK_INT >= 21) {
-            getWindow().setFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS,
-                    WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
-        }
+        final View background = findViewById(R.id.background);
+        final CoordinatorLayout mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
 
-        mBackgroundView = findViewById(R.id.background_view);
-        if (mBackgroundView != null) {
-            mBackgroundView.startAnimation(fadeIn);
-            mBackgroundView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    mBackgroundView.startAnimation(fadeOut);
+        assert mCoordinatorLayout != null;
+        FrameLayout mBottomSheet = (FrameLayout) mCoordinatorLayout.findViewById(R.id.bottom_sheet);
+
+        // Listens to bottom sheet changes
+        mBottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
+        mBottomSheetBehavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+
+                // Finishes activity when hidden
+                if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+                    finish();
                 }
-            });
-        }
+            }
 
-        mShareSheet = (LinearLayout) findViewById(R.id.share_sheet);
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+
+                // Animates the background on slide
+                if (background != null) {
+                    background.setAlpha(1 + slideOffset);
+                }
+            }
+        });
+
+        // Closes sheet on background click
+        assert background != null;
+        background.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            }
+        });
+
+        mBottomSheet.setAnimation(slideUp);
+        background.setAnimation(fadeIn);
+
+        LinearLayoutManager mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
+        RecyclerAdapter adapter = new RecyclerAdapter();
+        if (mRecyclerView != null) {
+            mRecyclerView.setAdapter(adapter);
+            mRecyclerView.setLayoutManager(mLayoutManager);
+        }
 
         TextView mActionButton = (TextView) findViewById(R.id.action_button);
         if (mActionButton != null) {
             mActionButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    new Handler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            mBackgroundView.startAnimation(fadeOut);
-                        }
-                    }, 200);
+                    mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
                 }
             });
         }
-    }
 
+    }
 
     private void createAnimations() {
         slideUp = AnimationUtils.loadAnimation(this, R.anim.slide_up);
         slideDown = AnimationUtils.loadAnimation(this, R.anim.slide_down);
         fadeIn = AnimationUtils.loadAnimation(this, R.anim.fade_in);
         fadeOut = AnimationUtils.loadAnimation(this, R.anim.fade_out);
-
-        slideDown.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                mShareSheet.setVisibility(View.GONE);
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-
-        // Listeners
-        fadeIn.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-                mShareSheet.startAnimation(slideUp);
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
-
-        fadeOut.setAnimationListener(new Animation.AnimationListener() {
-            @Override
-            public void onAnimationStart(Animation animation) {
-                mShareSheet.startAnimation(slideDown);
-            }
-
-            @Override
-            public void onAnimationEnd(Animation animation) {
-                finish();
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation animation) {
-
-            }
-        });
     }
 
     @Override
     public void onBackPressed() {
-        mBackgroundView.startAnimation(fadeOut);
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        //mBackgroundView.startAnimation(fadeOut);
     }
 
     public void onPause() {
