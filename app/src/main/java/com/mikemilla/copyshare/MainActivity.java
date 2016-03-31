@@ -16,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
@@ -24,6 +25,10 @@ import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.mikemilla.copyshare.helper.OnStartDragListener;
+import com.mikemilla.copyshare.helper.SimpleItemTouchHelperCallback;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private View background;
     private BottomSheetBehavior<FrameLayout> mBottomSheetBehavior;
     private FrameLayout mBottomSheet;
+    private ItemTouchHelper mItemTouchHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,17 +92,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // Animate first load
-        mBottomSheet.setAnimation(slideUp);
-        background.setAnimation(fadeIn);
-
         // Recycler List
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        RecyclerAdapter adapter = new RecyclerAdapter();
+        RecyclerAdapter adapter = new RecyclerAdapter(this);
         if (mRecyclerView != null) {
             mRecyclerView.setAdapter(adapter);
             mRecyclerView.setLayoutManager(mLayoutManager);
+            ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(adapter);
+            mItemTouchHelper = new ItemTouchHelper(callback);
+            mItemTouchHelper.attachToRecyclerView(mRecyclerView);
         }
 
         // Text View at top
@@ -132,6 +137,10 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+
+        // Animate first load
+        mBottomSheet.setAnimation(slideUp);
+        background.setAnimation(fadeIn);
 
     }
 

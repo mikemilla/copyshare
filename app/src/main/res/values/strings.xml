@@ -1,5 +1,17 @@
 <resources>
     <string name="app_name">CopyShare</string>
-    <string name="title_activity_main">MainActivity</string>
-    <string name="title_activity_share">ShareActivity</string>
+
+    <array name="dummy_items">
+        <item>Michael Miller</item>
+        <item>Calen Ducham</item>
+        <item>Anna Barry</item>
+        <item>Adrian Serba</item>
+        <item>Some Other Dude</item>
+        <item>Mom</item>
+        <item>Dave Smith</item>
+        <item>Hi</item>
+        <item>Something Else</item>
+        <item>Another</item>
+    </array>
+
 </resources>

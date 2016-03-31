@@ -22,7 +22,6 @@
 
         <activity
             android:name=".MainActivity"
-            android:label="@string/title_activity_share"
             android:theme="@style/AppTheme.Transparent"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
