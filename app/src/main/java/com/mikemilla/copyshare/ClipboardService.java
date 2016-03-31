@@ -69,7 +69,7 @@ public class ClipboardService extends Service {
                 startActivity(sendIntent);
                 */
 
-                Intent intent = new Intent(this, ShareActivity.class);
+                Intent intent = new Intent(this, MainActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
             }
