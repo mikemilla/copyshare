@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">CopyShare</string>
+    <string name="send">Send</string>
+    <string name="cancel">Cancel</string>
 
     <array name="dummy_items">
         <item>Michael Miller</item>
