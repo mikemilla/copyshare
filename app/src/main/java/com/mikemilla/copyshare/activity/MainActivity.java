@@ -36,6 +36,7 @@ import android.widget.Toast;
 
 import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.data.Contact;
+import com.mikemilla.copyshare.data.Defaults;
 import com.mikemilla.copyshare.data.FrequentContactAmount;
 import com.mikemilla.copyshare.service.ClipboardService;
 
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mActionButton, mShareToTextView;
     private Contact mContactToShareWith = null;
     private EditText mEditText;
+    public int selectedContactIndex;
 
     // Handle the clicks depending on data provided
     View.OnClickListener mCancelClick = new View.OnClickListener() {
@@ -69,11 +71,21 @@ public class MainActivity extends AppCompatActivity {
     View.OnClickListener mSendClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+
+            List<Contact> updatedContactList = Defaults.loadContacts(MainActivity.this);
+            if (updatedContactList != null) {
+                updatedContactList.remove(selectedContactIndex);
+                updatedContactList.add(0, mContactToShareWith);
+            }
+            Defaults.storeContacts(MainActivity.this, updatedContactList);
+
+            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
             SmsManager sms = SmsManager.getDefault();
             sms.sendTextMessage(mContactToShareWith.getNumber(), null,
                     mEditText.getText().toString(), null, null);
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-            Toast.makeText(MainActivity.this, "Link sent to " + mContactToShareWith.getName(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Sent copy to " + mContactToShareWith.getName(), Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -154,14 +166,28 @@ public class MainActivity extends AppCompatActivity {
 
             // Starts the service by default
             mServiceSwitch.setChecked(true);
-            startService();
+            if (!isServiceRunning(ClipboardService.class)) {
+                startService(new Intent(getBaseContext(), ClipboardService.class));
+            }
+
+            if (Defaults.loadContacts(this) == null) {
+                Toast.makeText(MainActivity.this, "Set", Toast.LENGTH_SHORT).show();
+                createInitialContactList();
+            } else {
+                Toast.makeText(MainActivity.this, "Get", Toast.LENGTH_SHORT).show();
+                RecyclerAdapter adapter = new RecyclerAdapter(this, Defaults.loadContacts(this));
+                if (mRecyclerView != null) {
+                    mRecyclerView.setAdapter(adapter);
+                    mRecyclerView.setLayoutManager(mLayoutManager);
+                }
+            }
 
             // Listen to check changes
             mServiceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     if (isChecked) {
-                        startService();
+                        startService(new Intent(getBaseContext(), ClipboardService.class));
                     } else {
                         if (isServiceRunning(ClipboardService.class)) {
                             stopService(new Intent(getBaseContext(), ClipboardService.class));
@@ -202,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Sets the contact that was selected
+     *
      * @param contact
      */
     public void setContactToShareWith(Contact contact) {
@@ -211,6 +238,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Returns the contact that was selected
+     *
      * @return
      */
     public Contact getContactToShareWith() {
@@ -221,7 +249,7 @@ public class MainActivity extends AppCompatActivity {
      * Begins running the copy service
      * Service Triggers when a user copies anything while it is running
      */
-    private void startService() {
+    private void createInitialContactList() {
         // Here, thisActivity is the current activity
         /*
         if (ContextCompat.checkSelfPermission(MainActivity.this,
@@ -237,13 +265,79 @@ public class MainActivity extends AppCompatActivity {
                         Manifest.permission.READ_CALL_LOG},
                 0);
 
+    }
+
+    /**
+     * Sets up list based on most contacted contacts
+     *
+     * @param callLogArray
+     */
+    public void searchAndDisplay(ArrayList<String> callLogArray) {
+
+        // Add numbers to list
+        // Add amounts to amounts
+        List<String> numbersList = new ArrayList<>();
+        List<Integer> callAmountList = new ArrayList<>();
+
+        // Loop through contacts and add them to two lists
+        // Keeps track of contact connection amount
+        for (int i = 0; i < callLogArray.size(); i++) {
+            int index = numbersList.indexOf(callLogArray.get(i));
+            if (index != -1) {
+                int newCount = callAmountList.get(index) + 1;
+                callAmountList.set(index, newCount);
+            } else {
+                numbersList.add(callLogArray.get(i));
+                callAmountList.add(1);
+            }
+        }
+
+        // Add Numbers and Amounts to new list
+        List<FrequentContactAmount> frequentContactsList = new ArrayList<>();
+        for (int i = 0; i < numbersList.size(); i++) {
+            frequentContactsList.add(new FrequentContactAmount(numbersList.get(i), callAmountList.get(i)));
+        }
+
+        // Sort the list (Reversed)
+        Collections.sort(frequentContactsList);
+
+        // Create initial Contact of most popular list
+        List<Contact> contactList = new ArrayList<>();
+
+        // Display contacts in reverse order
+        for (int i = frequentContactsList.size() - 1; i >= 0; i--) {
+
+            String contactName = getContactName(frequentContactsList.get(i).getNumber());
+            if (contactName != null) {
+                String contactNumber = frequentContactsList.get(i).getNumber();
+                contactList.add(new Contact(contactName, contactNumber, null));
+
+                //Log.d("Contact", contactName + " : " + contactNumber + " : " + frequentContactsList.get(i).getAmount());
+            }
+        }
+
+        // Set Default contact list
+        Defaults.storeContacts(this, contactList);
+
+        // Set the adapter based on the most popular connections
+        RecyclerAdapter adapter = new RecyclerAdapter(this, contactList);
+        if (mRecyclerView != null) {
+            mRecyclerView.setAdapter(adapter);
+            mRecyclerView.setLayoutManager(mLayoutManager);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         if (ContextCompat.checkSelfPermission(MainActivity.this,
                 Manifest.permission.READ_CALL_LOG)
                 == PackageManager.PERMISSION_GRANTED) {
 
             // Check all contacts to get most popular connections
             Date date = new Date();
-            ArrayList<String> allNumbers = new ArrayList();
+            ArrayList<String> allNumbers = new ArrayList<>();
             Cursor c = getContentResolver().query(
                     CallLog.Calls.CONTENT_URI,
                     null,
@@ -285,68 +379,11 @@ public class MainActivity extends AppCompatActivity {
             searchAndDisplay(allNumbers);
         }
 
-        startService(new Intent(getBaseContext(), ClipboardService.class));
-    }
-
-    /**
-     * Sets up list based on most contacted contacts
-     * @param callLogArray
-     */
-    public void searchAndDisplay(ArrayList<String> callLogArray) {
-
-        // Add numbers to list
-        // Add amounts to amounts
-        List<String> numbersList = new ArrayList<>();
-        List<Integer> callAmountList = new ArrayList<>();
-
-        // Loop through contacts and add them to two lists
-        // Keeps track of contact connection amount
-        for (int i = 0; i < callLogArray.size(); i++) {
-            int index = numbersList.indexOf(callLogArray.get(i));
-            if (index != -1) {
-                int newCount = callAmountList.get(index) + 1;
-                callAmountList.set(index, newCount);
-            } else {
-                numbersList.add(callLogArray.get(i));
-                callAmountList.add(1);
-            }
-        }
-
-        // Add Numbers and Amounts to new list
-        List<FrequentContactAmount> frequentContactsList = new ArrayList<>();
-        for (int i = 0; i < numbersList.size(); i++) {
-            frequentContactsList.add(new FrequentContactAmount(numbersList.get(i), callAmountList.get(i)));
-        }
-
-        // Sort the list (Reversed)
-        Collections.sort(frequentContactsList);
-
-        // Create initial Contact of most popular list
-        List<Contact> contactList = new ArrayList<>();
-
-        // Display contacts in reverse order
-        for (int i = frequentContactsList.size() - 1; i >= 0; i--) {
-
-            String contactName = getContactName(frequentContactsList.get(i).getNumber());
-            if (contactName != null) {
-                Bitmap contactPicture = getContactPhoto(frequentContactsList.get(i).getNumber());
-                String contactNumber = frequentContactsList.get(i).getNumber();
-                contactList.add(new Contact(contactPicture, contactName, contactNumber, null));
-
-                //Log.d("Contact", contactName + " : " + contactNumber + " : " + frequentContactsList.get(i).getAmount());
-            }
-        }
-
-        // Set the adapter based on the most popular connections
-        RecyclerAdapter adapter = new RecyclerAdapter(this, contactList);
-        if (mRecyclerView != null) {
-            mRecyclerView.setAdapter(adapter);
-            mRecyclerView.setLayoutManager(mLayoutManager);
-        }
     }
 
     /**
      * Returns the name of the contact
+     *
      * @param phoneNumber
      * @return
      */
@@ -374,6 +411,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Returns the profile image on the contact
+     *
      * @param phoneNumber
      * @return
      */
@@ -408,6 +446,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Check if the copy service is running
+     *
      * @param serviceClass
      * @return
      */

@@ -13,8 +13,7 @@ public class Contact {
     private String number;
     private String email;
 
-    public Contact(Bitmap picture, String name, String number, String email) {
-        this.picture = picture;
+    public Contact(String name, String number, String email) {
         this.name = name;
         this.number = number;
         this.email = email;

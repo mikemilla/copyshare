@@ -4,6 +4,7 @@
     package="com.mikemilla.copyshare"
     android:installLocation="internalOnly">
 
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.SEND_SMS" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
@@ -23,6 +24,7 @@
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
 
@@ -33,14 +35,17 @@
 
         <activity
             android:name=".activity.MainActivity"
+            android:excludeFromRecents="true"
             android:theme="@style/AppTheme.Transparent"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".activity.ContactsActivity" />
+
     </application>
 
 </manifest>
