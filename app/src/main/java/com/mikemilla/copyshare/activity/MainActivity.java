@@ -3,13 +3,10 @@ package com.mikemilla.copyshare.activity;
 import android.Manifest;
 import android.app.ActivityManager;
 import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CallLog;
@@ -38,9 +35,9 @@ import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.data.Contact;
 import com.mikemilla.copyshare.data.Defaults;
 import com.mikemilla.copyshare.data.FrequentContactAmount;
+import com.mikemilla.copyshare.lists.SendingRecyclerAdapter;
 import com.mikemilla.copyshare.service.ClipboardService;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -170,11 +167,19 @@ public class MainActivity extends AppCompatActivity {
                 startService(new Intent(getBaseContext(), ClipboardService.class));
             }
 
+            // Populate to create the contact list
             if (Defaults.loadContacts(this) == null) {
-                Toast.makeText(MainActivity.this, "Set", Toast.LENGTH_SHORT).show();
-                createInitialContactList();
+
+                /**
+                 * Need proper checking
+                 */
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.SEND_SMS,
+                                Manifest.permission.READ_CONTACTS,
+                                Manifest.permission.READ_CALL_LOG},
+                        0);
+
             } else {
-                Toast.makeText(MainActivity.this, "Get", Toast.LENGTH_SHORT).show();
                 SendingRecyclerAdapter adapter = new SendingRecyclerAdapter(this, Defaults.loadContacts(this));
                 if (mRecyclerView != null) {
                     mRecyclerView.setAdapter(adapter);
@@ -243,28 +248,6 @@ public class MainActivity extends AppCompatActivity {
      */
     public Contact getContactToShareWith() {
         return mContactToShareWith;
-    }
-
-    /**
-     * Begins running the copy service
-     * Service Triggers when a user copies anything while it is running
-     */
-    private void createInitialContactList() {
-        // Here, thisActivity is the current activity
-        /*
-        if (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.SEND_SMS)
-                != PackageManager.PERMISSION_GRANTED) {
-
-        }
-        */
-
-        ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{Manifest.permission.SEND_SMS,
-                        Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.READ_CALL_LOG},
-                0);
-
     }
 
     /**
@@ -410,41 +393,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Returns the profile image on the contact
-     *
-     * @param phoneNumber
-     * @return
-     */
-    public Bitmap getContactPhoto(String phoneNumber) {
-        Uri phoneUri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-        Uri photoUri;
-        ContentResolver cr = this.getContentResolver();
-        Cursor contact = cr.query(phoneUri, new String[]{ContactsContract.Contacts._ID}, null, null, null);
-
-        assert contact != null;
-        if (contact.moveToFirst()) {
-            long userId = contact.getLong(contact.getColumnIndex(ContactsContract.Contacts._ID));
-            photoUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, userId);
-
-        } else {
-            return BitmapFactory.decodeResource(getResources(), android.R.drawable.ic_menu_report_image);
-        }
-
-        if (photoUri != null) {
-            InputStream input = ContactsContract.Contacts.openContactPhotoInputStream(cr, photoUri);
-            if (input != null) {
-                return BitmapFactory.decodeStream(input);
-            }
-        } else {
-            return BitmapFactory.decodeResource(getResources(), android.R.drawable.ic_menu_report_image);
-        }
-
-        contact.close();
-
-        return BitmapFactory.decodeResource(getResources(), android.R.drawable.ic_menu_report_image);
-    }
-
-    /**
      * Check if the copy service is running
      *
      * @param serviceClass
@@ -468,5 +416,17 @@ public class MainActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         overridePendingTransition(0, 0);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Reload RecyclerView onResume
+        if (mRecyclerView != null) {
+            SendingRecyclerAdapter adapter = new SendingRecyclerAdapter(this, Defaults.loadContacts(this));
+            mRecyclerView.setAdapter(adapter);
+            mRecyclerView.setLayoutManager(mLayoutManager);
+        }
     }
 }

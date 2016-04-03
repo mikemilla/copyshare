@@ -1,5 +1,7 @@
 package com.mikemilla.copyshare.data;
 
+import java.util.List;
+
 /**
  * Created by Mike Miller on 3/31/16.
  * Because he needed it to be created for some reason
@@ -10,6 +12,14 @@ public class Contact {
     private String name;
     private String number;
     private String email;
+    private List<String> numbers;
+
+    public Contact(String picture, String name, List<String> numbers, String email) {
+        this.picture = picture;
+        this.name = name;
+        this.numbers = numbers;
+        this.email = email;
+    }
 
     public Contact(String picture, String name, String number, String email) {
         this.picture = picture;
@@ -22,6 +32,14 @@ public class Contact {
         this.name = name;
         this.number = number;
         this.email = email;
+    }
+
+    public List<String> getNumbers() {
+        return numbers;
+    }
+
+    public void setNumbers(List<String> numbers) {
+        this.numbers = numbers;
     }
 
     public String getPicture() {

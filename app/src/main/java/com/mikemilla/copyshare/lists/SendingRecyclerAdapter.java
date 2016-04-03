@@ -1,4 +1,4 @@
-package com.mikemilla.copyshare.activity;
+package com.mikemilla.copyshare.lists;
 
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -20,6 +20,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.mikemilla.copyshare.R;
+import com.mikemilla.copyshare.activity.ContactsActivity;
+import com.mikemilla.copyshare.activity.MainActivity;
 import com.mikemilla.copyshare.data.Contact;
 import com.mikemilla.copyshare.data.Defaults;
 
@@ -122,7 +124,6 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
 
                         new AlertDialog.Builder(mMainActivity)
                                 .setTitle("Remove Contact")
-                                .setMessage("Your Message")
                                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -140,6 +141,7 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
                                         Defaults.storeContacts(mMainActivity, updatedContactList);
                                     }
                                 }).show();
+
                         return false;
                     }
                 });

@@ -1,4 +1,4 @@
-package com.mikemilla.copyshare.activity;
+package com.mikemilla.copyshare.lists;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
