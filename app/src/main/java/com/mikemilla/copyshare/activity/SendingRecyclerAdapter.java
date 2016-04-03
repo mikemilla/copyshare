@@ -29,14 +29,14 @@ import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
-public class RecyclerAdapter extends RecyclerView.Adapter {
+public class SendingRecyclerAdapter extends RecyclerView.Adapter {
 
     private static final int FOOTER_VIEW = 1;
 
     private List<Contact> mContactsList = new ArrayList<>();
     private MainActivity mMainActivity;
 
-    public RecyclerAdapter(MainActivity activity, List<Contact> contactList) {
+    public SendingRecyclerAdapter(MainActivity activity, List<Contact> contactList) {
         super();
         mMainActivity = activity;
         mContactsList = contactList;
@@ -81,10 +81,10 @@ public class RecyclerAdapter extends RecyclerView.Adapter {
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int i) {
         View view;
         if (i == FOOTER_VIEW) {
-            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_footer, parent, false);
+            view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_send_footer, parent, false);
             return new FooterViewHolder(view);
         }
-        view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_item, parent, false);
+        view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_send_item, parent, false);
         return new ViewHolder(view);
     }
 

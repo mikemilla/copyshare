@@ -175,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
                 createInitialContactList();
             } else {
                 Toast.makeText(MainActivity.this, "Get", Toast.LENGTH_SHORT).show();
-                RecyclerAdapter adapter = new RecyclerAdapter(this, Defaults.loadContacts(this));
+                SendingRecyclerAdapter adapter = new SendingRecyclerAdapter(this, Defaults.loadContacts(this));
                 if (mRecyclerView != null) {
                     mRecyclerView.setAdapter(adapter);
                     mRecyclerView.setLayoutManager(mLayoutManager);
@@ -320,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
         Defaults.storeContacts(this, contactList);
 
         // Set the adapter based on the most popular connections
-        RecyclerAdapter adapter = new RecyclerAdapter(this, contactList);
+        SendingRecyclerAdapter adapter = new SendingRecyclerAdapter(this, contactList);
         if (mRecyclerView != null) {
             mRecyclerView.setAdapter(adapter);
             mRecyclerView.setLayoutManager(mLayoutManager);

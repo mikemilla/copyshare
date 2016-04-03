@@ -1,17 +1,22 @@
 package com.mikemilla.copyshare.data;
 
-import android.graphics.Bitmap;
-
 /**
  * Created by Mike Miller on 3/31/16.
  * Because he needed it to be created for some reason
  */
 public class Contact {
 
-    private Bitmap picture;
+    private String picture;
     private String name;
     private String number;
     private String email;
+
+    public Contact(String picture, String name, String number, String email) {
+        this.picture = picture;
+        this.name = name;
+        this.number = number;
+        this.email = email;
+    }
 
     public Contact(String name, String number, String email) {
         this.name = name;
@@ -19,7 +24,7 @@ public class Contact {
         this.email = email;
     }
 
-    public Bitmap getPicture() {
+    public String getPicture() {
         return picture;
     }
 
@@ -35,7 +40,7 @@ public class Contact {
         return email;
     }
 
-    public void setPicture(Bitmap picture) {
+    public void setPicture(String picture) {
         this.picture = picture;
     }
 
