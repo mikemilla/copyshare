@@ -45,7 +45,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    // Init
     private Animation slideUp, fadeIn;
     private View background;
     private BottomSheetBehavior<FrameLayout> mBottomSheetBehavior;
@@ -53,9 +52,10 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayoutManager mLayoutManager;
     private RecyclerView mRecyclerView;
     private TextView mActionButton, mShareToTextView;
-    private Contact mContactToShareWith = null;
     private EditText mEditText;
-    public int selectedContactIndex;
+
+    public List<Integer> selectedIndexes = new ArrayList<>();
+    public List<Contact> mSendingQueue = new ArrayList<>();
 
     // Handle the clicks depending on data provided
     View.OnClickListener mCancelClick = new View.OnClickListener() {
@@ -69,20 +69,25 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
 
+            // Update the contact list order
             List<Contact> updatedContactList = Defaults.loadContacts(MainActivity.this);
-            if (updatedContactList != null) {
-                updatedContactList.remove(selectedContactIndex);
-                updatedContactList.add(0, mContactToShareWith);
+            for (int i = 0; i < selectedIndexes.size(); i++) {
+                int index = selectedIndexes.get(i);
+                if (updatedContactList != null) {
+                    updatedContactList.remove(index);
+                    updatedContactList.add(0, mSendingQueue.get(i));
+                }
             }
             Defaults.storeContacts(MainActivity.this, updatedContactList);
 
+            // Close Bottom Sheet
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-            SmsManager sms = SmsManager.getDefault();
-            sms.sendTextMessage(mContactToShareWith.getNumber(), null,
-                    mEditText.getText().toString(), null, null);
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-            Toast.makeText(MainActivity.this, "Sent copy to " + mContactToShareWith.getName(), Toast.LENGTH_SHORT).show();
+            // Send SMS
+            for (int i = 0; i < mSendingQueue.size(); i++) {
+                SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
+                        mEditText.getText().toString(), null, null);
+            }
         }
     };
 
@@ -125,6 +130,17 @@ public class MainActivity extends AppCompatActivity {
 
                 // Finishes activity when hidden
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
+
+                    // Toast the sending info
+                    if (mSendingQueue.size() > 0) {
+                        if (mSendingQueue.size() == 1) {
+                            Toast.makeText(MainActivity.this, "Sent copy to " + mSendingQueue.get(0).getName(), Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this, "Sent copy to " + mSendingQueue.size() + " people", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    // Finish the app
                     finish();
                 }
             }
@@ -220,8 +236,14 @@ public class MainActivity extends AppCompatActivity {
      * Sets button status and text areas
      */
     public void setButtonViewContactInfo() {
-        if (mContactToShareWith != null) {
-            mShareToTextView.setText(mContactToShareWith.getName() + ", " + mContactToShareWith.getNumber());
+        if (mSendingQueue.size() > 0) {
+
+            List<String> numbers = new ArrayList<>();
+            for (Contact contact : mSendingQueue) {
+                numbers.add(contact.getName() + ", " + contact.getNumber());
+            }
+
+            mShareToTextView.setText(numbers.toString());
             mActionButton.setOnClickListener(mSendClick);
             mActionButton.setText(R.string.send);
         } else {
@@ -229,25 +251,6 @@ public class MainActivity extends AppCompatActivity {
             mActionButton.setOnClickListener(mCancelClick);
             mActionButton.setText(R.string.cancel);
         }
-    }
-
-    /**
-     * Sets the contact that was selected
-     *
-     * @param contact
-     */
-    public void setContactToShareWith(Contact contact) {
-        mContactToShareWith = contact;
-        setButtonViewContactInfo();
-    }
-
-    /**
-     * Returns the contact that was selected
-     *
-     * @return
-     */
-    public Contact getContactToShareWith() {
-        return mContactToShareWith;
     }
 
     /**
@@ -424,9 +427,16 @@ public class MainActivity extends AppCompatActivity {
 
         // Reload RecyclerView onResume
         if (mRecyclerView != null) {
+
+            // Update the view
             SendingRecyclerAdapter adapter = new SendingRecyclerAdapter(this, Defaults.loadContacts(this));
             mRecyclerView.setAdapter(adapter);
             mRecyclerView.setLayoutManager(mLayoutManager);
+
+            // Remove the lists and update UI
+            selectedIndexes.clear();
+            mSendingQueue.clear();
+            setButtonViewContactInfo();
         }
     }
 }

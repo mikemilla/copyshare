@@ -35,7 +35,7 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
 
     private static final int FOOTER_VIEW = 1;
 
-    private List<Contact> mContactsList = new ArrayList<>();
+    public List<Contact> mContactsList = new ArrayList<>();
     private MainActivity mMainActivity;
 
     public SendingRecyclerAdapter(MainActivity activity, List<Contact> contactList) {
@@ -105,12 +105,23 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
                 item.itemView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        if (mMainActivity.getContactToShareWith() == mContactsList.get(i)) {
-                            mMainActivity.setContactToShareWith(null);
+
+                        // Remember the index of the selected item
+                        if (mMainActivity.selectedIndexes.contains(i)) {
+                            mMainActivity.selectedIndexes.remove(Integer.valueOf(i));
                         } else {
-                            mMainActivity.setContactToShareWith(mContactsList.get(i));
-                            mMainActivity.selectedContactIndex = i;
+                            mMainActivity.selectedIndexes.add(i);
                         }
+
+                        // Remember the contact in another list
+                        if (mMainActivity.mSendingQueue.contains(mContactsList.get(i))) {
+                            mMainActivity.mSendingQueue.remove(mContactsList.get(i));
+                        } else {
+                            mMainActivity.mSendingQueue.add(mContactsList.get(i));
+                        }
+
+                        // Update the UI
+                        mMainActivity.setButtonViewContactInfo();
                     }
                 });
 
@@ -119,6 +130,7 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
                     @Override
                     public boolean onLongClick(View v) {
 
+                        // Little vibrate
                         Vibrator vibrate = (Vibrator) mMainActivity.getSystemService(Context.VIBRATOR_SERVICE);
                         vibrate.vibrate(20);
 
@@ -133,12 +145,20 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
                                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
+
                                         List<Contact> updatedContactList = Defaults.loadContacts(mMainActivity);
                                         if (updatedContactList != null) {
                                             updatedContactList.remove(i);
                                         }
+
+                                        if (mMainActivity.mSendingQueue.contains(mContactsList.get(i))) {
+                                            mMainActivity.mSendingQueue.remove(mContactsList.get(i));
+                                        }
+
                                         item.removeAt(i);
                                         Defaults.storeContacts(mMainActivity, updatedContactList);
+
+                                        mMainActivity.setButtonViewContactInfo();
                                     }
                                 }).show();
 
