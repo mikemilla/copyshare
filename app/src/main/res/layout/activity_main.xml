@@ -21,7 +21,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/white"
+            android:clickable="true"
             android:elevation="8dp"
+            android:onClick="@null"
             app:behavior_hideable="true"
             app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
@@ -30,16 +32,23 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="@color/border" />
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:orientation="horizontal">
 
-                    <TextView
+                    <com.mikemilla.copyshare.views.StyledTextView
                         android:id="@+id/share_to_text_view"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="1" />
+                        android:layout_weight="1"
+                        android:textColor="@color/text_color"
+                        android:textSize="18sp" />
 
                     <Switch
                         android:id="@+id/service_switch"
@@ -51,20 +60,34 @@
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/recycler_view"
                     android:layout_width="match_parent"
-                    android:layout_height="144dp" />
+                    android:layout_height="112dp" />
 
-                <EditText
+                <com.mikemilla.copyshare.views.StyledEditText
                     android:id="@+id/edit_text"
                     android:layout_width="match_parent"
-                    android:layout_height="@dimen/seventy_two" />
+                    android:layout_height="wrap_content"
+                    android:layout_margin="@dimen/eight"
+                    android:background="@drawable/edit_text_background"
+                    android:padding="@dimen/sixteen"
+                    android:textSize="16sp" />
 
-                <TextView
+                <FrameLayout
                     android:id="@+id/action_button"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:background="?attr/selectableItemBackground"
-                    android:gravity="center"
-                    android:text="Cancel" />
+                    android:layout_height="66dp"
+                    android:foreground="?attr/selectableItemBackground">
+
+                    <com.mikemilla.copyshare.views.StyledTextView
+                        android:id="@+id/action_text_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        android:gravity="center"
+                        android:text="@string/cancel"
+                        android:textColor="@color/text_color"
+                        android:textSize="20sp" />
+
+                </FrameLayout>
 
             </LinearLayout>
 

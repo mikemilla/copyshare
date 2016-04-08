@@ -7,4 +7,6 @@
     <dimen name="eighty_eight">88dp</dimen>
     <dimen name="seventy_two">72dp</dimen>
     <dimen name="fifty_six">56dp</dimen>
+    <dimen name="sixteen">16dp</dimen>
+    <dimen name="eight">8dp</dimen>
 </resources>

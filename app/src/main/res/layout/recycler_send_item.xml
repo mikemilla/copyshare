@@ -22,29 +22,24 @@
                 android:layout_width="56dp"
                 android:layout_height="56dp"
                 android:layout_centerInParent="true"
-                android:src="@drawable/profile" />
-
-            <!--
-
-            app:civ_border_color="#FF000000"
-                app:civ_border_width="2dp"
-
-                -->
+                android:src="@drawable/profile"
+                app:civ_border_color="@color/border"
+                app:civ_border_width="2dp" />
 
         </RelativeLayout>
 
-
     </RelativeLayout>
 
-    <TextView
+    <com.mikemilla.copyshare.views.StyledTextView
         android:id="@+id/text_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="center"
+        android:gravity="center_horizontal"
         android:maxLines="2"
-        android:padding="4dp">
+        android:padding="4dp"
+        android:textColor="@color/text_color">
 
-    </TextView>
+    </com.mikemilla.copyshare.views.StyledTextView>
 
 </LinearLayout>

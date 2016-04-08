@@ -9,23 +9,23 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.data.Contact;
 import com.mikemilla.copyshare.data.Defaults;
+import com.mikemilla.copyshare.views.StyledTextView;
 
 import java.util.List;
 
 public class ContactViewHolder extends RecyclerView.ViewHolder {
 
-    private final TextView tvText;
+    private final StyledTextView tvText;
     private final ImageView imageView;
 
     public ContactViewHolder(View itemView) {
         super(itemView);
 
-        tvText = (TextView) itemView.findViewById(R.id.text_view);
+        tvText = (StyledTextView) itemView.findViewById(R.id.text_view);
         imageView = (ImageView) itemView.findViewById(R.id.contact_image);
     }
 

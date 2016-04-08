@@ -16,13 +16,14 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.LinearLayout;
-import android.widget.TextView;
+
+import com.mikemilla.copyshare.views.StyledTextView;
 
 public class RecyclerViewFastScroller extends LinearLayout {
     private static final int BUBBLE_ANIMATION_DURATION = 100;
     private static final int TRACK_SNAP_RANGE = 5;
 
-    private TextView bubble;
+    private StyledTextView bubble;
     private View handle;
     private RecyclerView recyclerView;
     private int height;
@@ -71,7 +72,7 @@ public class RecyclerViewFastScroller extends LinearLayout {
     public void setViewsToUse(@LayoutRes int layoutResId, @IdRes int bubbleResId, @IdRes int handleResId) {
         final LayoutInflater inflater = LayoutInflater.from(getContext());
         inflater.inflate(layoutResId, this, true);
-        bubble = (TextView) findViewById(bubbleResId);
+        bubble = (StyledTextView) findViewById(bubbleResId);
         if (bubble != null)
             bubble.setVisibility(INVISIBLE);
         handle = findViewById(handleResId);

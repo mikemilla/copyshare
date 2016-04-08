@@ -3,18 +3,7 @@
     <string name="send">Send</string>
     <string name="cancel">Cancel</string>
     <string name="search_contacts">Search Contacts</string>
-
-    <array name="dummy_items">
-        <item>Michael Miller</item>
-        <item>Calen Ducham</item>
-        <item>Anna Barry</item>
-        <item>Adrian Serba</item>
-        <item>Some Other Dude</item>
-        <item>Mom</item>
-        <item>Dave Smith</item>
-        <item>Hi</item>
-        <item>Something Else</item>
-        <item>Another</item>
-    </array>
-
+    <!--<string name="font">fonts/Arvo-Regular.ttf</string>-->
+    <string name="font">fonts/Montserrat-Regular.otf</string>
+    <string name="add_contacts">Add Contacts</string>
 </resources>

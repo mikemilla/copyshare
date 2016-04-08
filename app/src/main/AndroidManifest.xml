@@ -44,7 +44,9 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".activity.ContactsActivity" />
+        <activity
+            android:name=".activity.ContactsActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
 
     </application>
 

@@ -10,26 +10,27 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.SearchView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.mikemilla.copyshare.lists.ContactAdapter;
-import com.mikemilla.copyshare.lists.ContactModel;
 import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.data.Contact;
+import com.mikemilla.copyshare.lists.ContactAdapter;
+import com.mikemilla.copyshare.lists.ContactModel;
 import com.mikemilla.copyshare.lists.RecyclerViewFastScroller;
+import com.mikemilla.copyshare.views.StyledSearchView;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ContactsActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
+public class ContactsActivity extends AppCompatActivity implements StyledSearchView.OnQueryTextListener {
 
     private RecyclerView mRecyclerView;
     private List<ContactModel> mModels;
     private ContactAdapter mAdapter;
     private RecyclerViewFastScroller fastScroller;
+    private android.support.v7.widget.Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,8 +43,12 @@ public class ContactsActivity extends AppCompatActivity implements SearchView.On
         }
 
         // Add back button to action bar (Toolbar)
+        mToolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
         // Add Contacts to the lists
@@ -78,14 +83,14 @@ public class ContactsActivity extends AppCompatActivity implements SearchView.On
             }
         });
         fastScroller.setRecyclerView(mRecyclerView);
-        fastScroller.setViewsToUse(R.layout.recycler_view_fast_scroller__fast_scroller, R.id.fastscroller_bubble, R.id.fastscroller_handle);
+        fastScroller.setViewsToUse(R.layout.recycler_view_fast_scroller_fast_scroller, R.id.fastscroller_bubble, R.id.fastscroller_handle);
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.search, menu);
         final MenuItem item = menu.findItem(R.id.action_search);
-        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+        final StyledSearchView searchView = (StyledSearchView) MenuItemCompat.getActionView(item);
         searchView.setMaxWidth(Integer.MAX_VALUE);
         searchView.setOnQueryTextListener(this);
         return true;
@@ -106,6 +111,7 @@ public class ContactsActivity extends AppCompatActivity implements SearchView.On
 
     /**
      * Filters contacts to show queried results
+     *
      * @param models
      * @param query
      * @return

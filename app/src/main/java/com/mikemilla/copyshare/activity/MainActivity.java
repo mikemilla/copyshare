@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CallLog;
@@ -19,14 +20,13 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.telephony.SmsManager;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +37,8 @@ import com.mikemilla.copyshare.data.Defaults;
 import com.mikemilla.copyshare.data.FrequentContactAmount;
 import com.mikemilla.copyshare.lists.SendingRecyclerAdapter;
 import com.mikemilla.copyshare.service.ClipboardService;
+import com.mikemilla.copyshare.views.StyledEditText;
+import com.mikemilla.copyshare.views.StyledTextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,11 +50,12 @@ public class MainActivity extends AppCompatActivity {
     private Animation slideUp, fadeIn;
     private View background;
     private BottomSheetBehavior<FrameLayout> mBottomSheetBehavior;
-    private FrameLayout mBottomSheet;
+    private FrameLayout mBottomSheet, mActionButton;
     private LinearLayoutManager mLayoutManager;
     private RecyclerView mRecyclerView;
-    private TextView mActionButton, mShareToTextView;
-    private EditText mEditText;
+    private StyledTextView mShareToTextView, mActionTextView;
+    private StyledEditText mEditText;
+    private boolean didPressSend = false;
 
     public List<Integer> selectedIndexes = new ArrayList<>();
     public List<Contact> mSendingQueue = new ArrayList<>();
@@ -66,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
     View.OnClickListener mSendClick = new View.OnClickListener() {
+
         @Override
         public void onClick(View v) {
 
@@ -82,11 +86,12 @@ public class MainActivity extends AppCompatActivity {
 
             // Close Bottom Sheet
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+            didPressSend = true;
 
             // Send SMS
             for (int i = 0; i < mSendingQueue.size(); i++) {
-                SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
-                        mEditText.getText().toString(), null, null);
+                //SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
+                        //mEditText.getText().toString(), null, null);
             }
         }
     };
@@ -132,12 +137,24 @@ public class MainActivity extends AppCompatActivity {
                 if (newState == BottomSheetBehavior.STATE_HIDDEN) {
 
                     // Toast the sending info
-                    if (mSendingQueue.size() > 0) {
+                    if (mSendingQueue.size() > 0 && didPressSend) {
+
+                        Toast toast;
+
                         if (mSendingQueue.size() == 1) {
-                            Toast.makeText(MainActivity.this, "Sent copy to " + mSendingQueue.get(0).getName(), Toast.LENGTH_SHORT).show();
+                            toast = Toast.makeText(MainActivity.this,
+                                    "Sent copy to " + mSendingQueue.get(0).getName(), Toast.LENGTH_SHORT);
                         } else {
-                            Toast.makeText(MainActivity.this, "Sent copy to " + mSendingQueue.size() + " people", Toast.LENGTH_SHORT).show();
+                            toast = Toast.makeText(MainActivity.this,
+                                    "Sent copy to " + mSendingQueue.size() + " people", Toast.LENGTH_SHORT);
                         }
+
+                        // Change toast font
+                        LinearLayout toastLayout = (LinearLayout) toast.getView();
+                        TextView textView = (TextView) toastLayout.getChildAt(0);
+                        Typeface tf = Typeface.createFromAsset(MainActivity.this.getAssets(), getResources().getString(R.string.font));
+                        textView.setTypeface(tf);
+                        toast.show();
                     }
 
                     // Finish the app
@@ -160,17 +177,18 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         // Text View at top
-        mShareToTextView = (TextView) findViewById(R.id.share_to_text_view);
+        mShareToTextView = (StyledTextView) findViewById(R.id.share_to_text_view);
 
         // Setup the edit text
-        mEditText = (EditText) findViewById(R.id.edit_text);
+        mEditText = (StyledEditText) findViewById(R.id.edit_text);
         if (getIntent().getExtras() != null) {
             String link = getIntent().getExtras().getString(ClipboardService.GET_LINK);
             mEditText.setText(link);
         }
 
         // Text View as Button
-        mActionButton = (TextView) findViewById(R.id.action_button);
+        mActionButton = (FrameLayout) findViewById(R.id.action_button);
+        mActionTextView = (StyledTextView) findViewById(R.id.action_text_view);
         setButtonViewContactInfo();
 
         // Switch
@@ -245,11 +263,16 @@ public class MainActivity extends AppCompatActivity {
 
             mShareToTextView.setText(numbers.toString());
             mActionButton.setOnClickListener(mSendClick);
-            mActionButton.setText(R.string.send);
+            mActionTextView.setText(R.string.send);
+            mActionTextView.setText(R.string.send);
+            mActionTextView.setTextColor(ContextCompat.getColor(this, R.color.white));
+            mActionTextView.setBackgroundColor(ContextCompat.getColor(this, R.color.accent));
         } else {
             mShareToTextView.setText(null);
             mActionButton.setOnClickListener(mCancelClick);
-            mActionButton.setText(R.string.cancel);
+            mActionTextView.setText(R.string.cancel);
+            mActionTextView.setTextColor(ContextCompat.getColor(this, R.color.text_color));
+            mActionTextView.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
         }
     }
 

@@ -17,13 +17,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.activity.ContactsActivity;
 import com.mikemilla.copyshare.activity.MainActivity;
 import com.mikemilla.copyshare.data.Contact;
 import com.mikemilla.copyshare.data.Defaults;
+import com.mikemilla.copyshare.views.StyledTextView;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -48,13 +48,13 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
 
         LinearLayout container;
         CircleImageView imageView;
-        TextView textView;
+        StyledTextView textView;
 
         public ViewHolder(View itemView) {
             super(itemView);
             container = (LinearLayout) itemView.findViewById(R.id.container);
             imageView = (CircleImageView) itemView.findViewById(R.id.contact_image);
-            textView = (TextView) itemView.findViewById(R.id.text_view);
+            textView = (StyledTextView) itemView.findViewById(R.id.text_view);
         }
 
         public void removeAt(int position) {
