@@ -8,9 +8,12 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -21,7 +24,7 @@ import android.widget.LinearLayout;
 import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.activity.ContactsActivity;
 import com.mikemilla.copyshare.activity.MainActivity;
-import com.mikemilla.copyshare.data.Contact;
+import com.mikemilla.copyshare.data.ContactModel;
 import com.mikemilla.copyshare.data.Defaults;
 import com.mikemilla.copyshare.views.StyledTextView;
 
@@ -35,10 +38,10 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
 
     private static final int FOOTER_VIEW = 1;
 
-    public List<Contact> mContactsList = new ArrayList<>();
+    public List<ContactModel> mContactsList = new ArrayList<>();
     private MainActivity mMainActivity;
 
-    public SendingRecyclerAdapter(MainActivity activity, List<Contact> contactList) {
+    public SendingRecyclerAdapter(MainActivity activity, List<ContactModel> contactList) {
         super();
         mMainActivity = activity;
         mContactsList = contactList;
@@ -49,11 +52,13 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
         LinearLayout container;
         CircleImageView imageView;
         StyledTextView textView;
+        StyledTextView contactLetterText;
 
         public ViewHolder(View itemView) {
             super(itemView);
             container = (LinearLayout) itemView.findViewById(R.id.container);
             imageView = (CircleImageView) itemView.findViewById(R.id.contact_image);
+            contactLetterText = (StyledTextView) itemView.findViewById(R.id.contact_letter_text);
             textView = (StyledTextView) itemView.findViewById(R.id.text_view);
         }
 
@@ -98,8 +103,24 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
 
                 final ViewHolder item = (ViewHolder) viewHolder;
 
-                item.imageView.setImageBitmap(getContactPhoto(mContactsList.get(i).getNumber()));
                 item.textView.setText(mContactsList.get(i).getName());
+                if (getContactPhoto(mContactsList.get(i).getNumber()) != null) {
+                    item.imageView.setVisibility(View.VISIBLE);
+                    item.imageView.setImageBitmap(getContactPhoto(mContactsList.get(i).getNumber()));
+                    item.contactLetterText.setVisibility(View.GONE);
+                } else {
+                    item.imageView.setVisibility(View.GONE);
+                    item.contactLetterText.setVisibility(View.VISIBLE);
+                    item.contactLetterText.setText(mContactsList.get(i).getNameLetter());
+
+                    if (Build.VERSION.SDK_INT >= 16) {
+                        item.contactLetterText.setBackground(
+                                MainActivity.contactColors.get(mContactsList.get(i).getColor()));
+                    } else {
+                        item.contactLetterText.setBackgroundDrawable(
+                                MainActivity.contactColors.get(mContactsList.get(i).getColor()));
+                    }
+                }
 
                 // Clicks
                 item.itemView.setOnClickListener(new View.OnClickListener() {
@@ -146,7 +167,7 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
 
-                                        List<Contact> updatedContactList = Defaults.loadContacts(mMainActivity);
+                                        List<ContactModel> updatedContactList = Defaults.loadContacts(mMainActivity);
                                         if (updatedContactList != null) {
                                             updatedContactList.remove(i);
                                         }
@@ -173,6 +194,29 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
             e.printStackTrace();
         }
 
+    }
+
+    private Drawable getBackgroundColor(Context context, int value) {
+        Drawable drawable = ContextCompat.getDrawable(context, R.drawable.circle_blue);
+        switch(value) {
+            case 0: {
+                drawable = ContextCompat.getDrawable(context, R.drawable.circle_blue);
+                break;
+            }
+            case 1: {
+                drawable = ContextCompat.getDrawable(context, R.drawable.circle_green);
+                break;
+            }
+            case 2: {
+                drawable = ContextCompat.getDrawable(context, R.drawable.circle_orange);
+                break;
+            }
+            case 3: {
+                drawable = ContextCompat.getDrawable(context, R.drawable.circle_purple);
+                break;
+            }
+        }
+        return drawable;
     }
 
     @Override
@@ -217,7 +261,7 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
             photoUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, userId);
 
         } else {
-            return BitmapFactory.decodeResource(mMainActivity.getResources(), android.R.drawable.ic_menu_report_image);
+            return null;
         }
 
         if (photoUri != null) {
@@ -226,12 +270,12 @@ public class SendingRecyclerAdapter extends RecyclerView.Adapter {
                 return BitmapFactory.decodeStream(input);
             }
         } else {
-            return BitmapFactory.decodeResource(mMainActivity.getResources(), android.R.drawable.ic_menu_report_image);
+            return null;
         }
 
         contact.close();
 
-        return BitmapFactory.decodeResource(mMainActivity.getResources(), android.R.drawable.ic_menu_report_image);
+        return null;
     }
 
 }

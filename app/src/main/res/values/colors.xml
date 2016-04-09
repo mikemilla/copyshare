@@ -10,4 +10,7 @@
     <color name="edit_text_background">#F6F6F6</color>
     <color name="handle">#FF737373</color>
     <color name="text_color">#777777</color>
+    <color name="green">#4CAF50</color>
+    <color name="orange">#FF5722</color>
+    <color name="purple">#673AB7</color>
 </resources>

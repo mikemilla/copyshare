@@ -2,6 +2,7 @@ package com.mikemilla.copyshare.lists;
 
 import android.content.DialogInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,7 +12,8 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.mikemilla.copyshare.R;
-import com.mikemilla.copyshare.data.Contact;
+import com.mikemilla.copyshare.activity.MainActivity;
+import com.mikemilla.copyshare.data.ContactModel;
 import com.mikemilla.copyshare.data.Defaults;
 import com.mikemilla.copyshare.views.StyledTextView;
 
@@ -21,12 +23,14 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
 
     private final StyledTextView tvText;
     private final ImageView imageView;
+    private final StyledTextView contactLetter;
 
     public ContactViewHolder(View itemView) {
         super(itemView);
 
         tvText = (StyledTextView) itemView.findViewById(R.id.text_view);
         imageView = (ImageView) itemView.findViewById(R.id.contact_image);
+        contactLetter = (StyledTextView) itemView.findViewById(R.id.contact_letter);
     }
 
     public void bind(final ContactModel model) {
@@ -35,8 +39,19 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
         if (model.getPicture() != null) {
             Uri image = Uri.parse(model.getPicture());
             imageView.setImageURI(image);
+            imageView.setVisibility(View.VISIBLE);
+            contactLetter.setVisibility(View.GONE);
         } else {
             imageView.setImageBitmap(null);
+            imageView.setVisibility(View.GONE);
+            contactLetter.setVisibility(View.VISIBLE);
+            contactLetter.setText(model.getNameLetter());
+
+            if (Build.VERSION.SDK_INT >= 16) {
+                contactLetter.setBackground(MainActivity.contactColors.get(model.getColor()));
+            } else {
+                contactLetter.setBackgroundDrawable(MainActivity.contactColors.get(model.getColor()));
+            }
         }
 
         itemView.setOnClickListener(new View.OnClickListener() {
@@ -66,9 +81,9 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                        List<Contact> contactList = Defaults.loadContacts(itemView.getContext());
+                        List<ContactModel> contactList = Defaults.loadContacts(itemView.getContext());
                         if (contactList != null) {
-                            contactList.add(new Contact(model.getName(), model.getNumbers().get(position), null));
+                            contactList.add(new ContactModel(null, model.getName(), null, model.getNumbers().get(position)));
                         }
                         Defaults.storeContacts(itemView.getContext(), contactList);
                         mDialog.dismiss();

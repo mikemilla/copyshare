@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.mikemilla.copyshare.R;
+import com.mikemilla.copyshare.data.ContactModel;
 
 import java.util.ArrayList;
 import java.util.List;

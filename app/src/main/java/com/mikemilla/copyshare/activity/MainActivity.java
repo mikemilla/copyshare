@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CallLog;
@@ -20,6 +21,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
@@ -32,9 +34,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mikemilla.copyshare.R;
-import com.mikemilla.copyshare.data.Contact;
 import com.mikemilla.copyshare.data.Defaults;
 import com.mikemilla.copyshare.data.FrequentContactAmount;
+import com.mikemilla.copyshare.data.ContactModel;
 import com.mikemilla.copyshare.lists.SendingRecyclerAdapter;
 import com.mikemilla.copyshare.service.ClipboardService;
 import com.mikemilla.copyshare.views.StyledEditText;
@@ -56,9 +58,10 @@ public class MainActivity extends AppCompatActivity {
     private StyledTextView mShareToTextView, mActionTextView;
     private StyledEditText mEditText;
     private boolean didPressSend = false;
+    private boolean developerMode = true;
 
     public List<Integer> selectedIndexes = new ArrayList<>();
-    public List<Contact> mSendingQueue = new ArrayList<>();
+    public List<ContactModel> mSendingQueue = new ArrayList<>();
 
     // Handle the clicks depending on data provided
     View.OnClickListener mCancelClick = new View.OnClickListener() {
@@ -74,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
 
             // Update the contact list order
-            List<Contact> updatedContactList = Defaults.loadContacts(MainActivity.this);
+            List<ContactModel> updatedContactList = Defaults.loadContacts(MainActivity.this);
             for (int i = 0; i < selectedIndexes.size(); i++) {
                 int index = selectedIndexes.get(i);
                 if (updatedContactList != null) {
@@ -90,16 +93,26 @@ public class MainActivity extends AppCompatActivity {
 
             // Send SMS
             for (int i = 0; i < mSendingQueue.size(); i++) {
-                //SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
-                        //mEditText.getText().toString(), null, null);
+                if (!developerMode) {
+                    SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
+                            mEditText.getText().toString(), null, null);
+                }
             }
         }
     };
+
+    public static List<Drawable> contactColors = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        // Should move this
+        contactColors.add(ContextCompat.getDrawable(this, R.drawable.circle_blue));
+        contactColors.add(ContextCompat.getDrawable(this, R.drawable.circle_green));
+        contactColors.add(ContextCompat.getDrawable(this, R.drawable.circle_purple));
+        contactColors.add(ContextCompat.getDrawable(this, R.drawable.circle_orange));
 
         // Load the animations
         createAnimations();
@@ -184,6 +197,9 @@ public class MainActivity extends AppCompatActivity {
         if (getIntent().getExtras() != null) {
             String link = getIntent().getExtras().getString(ClipboardService.GET_LINK);
             mEditText.setText(link);
+        } else {
+            assert mEditText != null;
+            mEditText.setVisibility(View.GONE);
         }
 
         // Text View as Button
@@ -257,7 +273,7 @@ public class MainActivity extends AppCompatActivity {
         if (mSendingQueue.size() > 0) {
 
             List<String> numbers = new ArrayList<>();
-            for (Contact contact : mSendingQueue) {
+            for (ContactModel contact : mSendingQueue) {
                 numbers.add(contact.getName() + ", " + contact.getNumber());
             }
 
@@ -311,7 +327,7 @@ public class MainActivity extends AppCompatActivity {
         Collections.sort(frequentContactsList);
 
         // Create initial Contact of most popular list
-        List<Contact> contactList = new ArrayList<>();
+        List<ContactModel> contactList = new ArrayList<>();
 
         // Display contacts in reverse order
         for (int i = frequentContactsList.size() - 1; i >= 0; i--) {
@@ -319,8 +335,7 @@ public class MainActivity extends AppCompatActivity {
             String contactName = getContactName(frequentContactsList.get(i).getNumber());
             if (contactName != null) {
                 String contactNumber = frequentContactsList.get(i).getNumber();
-                contactList.add(new Contact(contactName, contactNumber, null));
-
+                contactList.add(new ContactModel(null, contactName, null, contactNumber));
                 //Log.d("Contact", contactName + " : " + contactNumber + " : " + frequentContactsList.get(i).getAmount());
             }
         }

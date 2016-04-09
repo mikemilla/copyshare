@@ -15,9 +15,8 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.mikemilla.copyshare.R;
-import com.mikemilla.copyshare.data.Contact;
 import com.mikemilla.copyshare.lists.ContactAdapter;
-import com.mikemilla.copyshare.lists.ContactModel;
+import com.mikemilla.copyshare.data.ContactModel;
 import com.mikemilla.copyshare.lists.RecyclerViewFastScroller;
 import com.mikemilla.copyshare.views.StyledSearchView;
 
@@ -54,8 +53,8 @@ public class ContactsActivity extends AppCompatActivity implements StyledSearchV
         // Add Contacts to the lists
         mModels = new ArrayList<>();
         if (getContacts() != null) {
-            for (Contact contact : getContacts()) {
-                mModels.add(new ContactModel(contact.getPicture(), contact.getName(), contact.getNumbers()));
+            for (ContactModel contact : getContacts()) {
+                mModels.add(new ContactModel(contact.getPicture(), contact.getName(), contact.getNumbers(), null));
             }
         }
 
@@ -144,12 +143,12 @@ public class ContactsActivity extends AppCompatActivity implements StyledSearchV
         return (res == PackageManager.PERMISSION_GRANTED);
     }
 
-    private List<Contact> getContacts() {
+    private List<ContactModel> getContacts() {
         if (checkContactsReadPermission()) {
 
             String mLastContactName = "";
             int index = 0;
-            List<Contact> contacts = new ArrayList<>();
+            List<ContactModel> contacts = new ArrayList<>();
 
             Cursor phones = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME + " ASC");
             if (phones != null) {
@@ -165,7 +164,7 @@ public class ContactsActivity extends AppCompatActivity implements StyledSearchV
                         } else {
                             List<String> numbers = new ArrayList<>();
                             numbers.add(phoneNumber);
-                            contacts.add(new Contact(picture, name, numbers, null));
+                            contacts.add(new ContactModel(picture, name, numbers, null));
                             index++;
                         }
                     }

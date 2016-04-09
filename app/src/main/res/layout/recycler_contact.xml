@@ -18,14 +18,25 @@
         app:civ_border_width="2dp" />
 
     <com.mikemilla.copyshare.views.StyledTextView
+        android:id="@+id/contact_letter"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/circle_blue"
+        android:gravity="center"
+        android:textColor="@color/white"
+        android:textSize="22sp"
+        android:visibility="gone" />
+
+    <com.mikemilla.copyshare.views.StyledTextView
         android:id="@+id/text_view"
         android:layout_width="0dp"
         android:layout_height="match_parent"
         android:layout_weight="1"
         android:gravity="center_vertical"
         android:maxLines="2"
-        android:paddingRight="@dimen/activity_vertical_margin"
         android:paddingLeft="0dp"
+        android:paddingRight="@dimen/activity_vertical_margin"
         android:textColor="@color/text_color"
         android:textSize="18sp"
         tools:ignore="RtlHardcoded" />

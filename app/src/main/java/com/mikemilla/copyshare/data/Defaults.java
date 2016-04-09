@@ -18,7 +18,7 @@ public class Defaults {
     public static final String PREFS = "PREFS";
     public static final String CONTACTS = "CONTACTS";
 
-    public static void storeContacts(Context context, List<Contact> contacts) {
+    public static void storeContacts(Context context, List<ContactModel> contacts) {
 
         // Used for store List in json format
         SharedPreferences settings;
@@ -31,16 +31,16 @@ public class Defaults {
         editor.commit();
     }
 
-    public static List<Contact> loadContacts(Context context) {
+    public static List<ContactModel> loadContacts(Context context) {
 
         // Used for retrieving list from json formatted string
         SharedPreferences settings;
-        List<Contact> contacts;
+        List<ContactModel> contacts;
         settings = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         if (settings.contains(CONTACTS)) {
             String jsonContacts = settings.getString(CONTACTS, null);
             Gson gson = new Gson();
-            Contact[] contactItems = gson.fromJson(jsonContacts, Contact[].class);
+            ContactModel[] contactItems = gson.fromJson(jsonContacts, ContactModel[].class);
             contacts = Arrays.asList(contactItems);
             contacts = new ArrayList<>(contacts);
             return contacts;
