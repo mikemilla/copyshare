@@ -15,7 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.mikemilla.copyshare.R;
-import com.mikemilla.copyshare.lists.ContactAdapter;
+import com.mikemilla.copyshare.lists.ContactAddingAdapter;
 import com.mikemilla.copyshare.data.ContactModel;
 import com.mikemilla.copyshare.lists.RecyclerViewFastScroller;
 import com.mikemilla.copyshare.views.StyledSearchView;
@@ -27,7 +27,7 @@ public class ContactsActivity extends AppCompatActivity implements StyledSearchV
 
     private RecyclerView mRecyclerView;
     private List<ContactModel> mModels;
-    private ContactAdapter mAdapter;
+    private ContactAddingAdapter mAdapter;
     private RecyclerViewFastScroller fastScroller;
     private android.support.v7.widget.Toolbar mToolbar;
 
@@ -60,7 +60,7 @@ public class ContactsActivity extends AppCompatActivity implements StyledSearchV
 
         // Setup the recycler view and adapter
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
-        mAdapter = new ContactAdapter(this, mModels);
+        mAdapter = new ContactAddingAdapter(this, mModels);
         mRecyclerView.setAdapter(mAdapter);
 
         // Setup Fast Scroll Bar
@@ -82,7 +82,7 @@ public class ContactsActivity extends AppCompatActivity implements StyledSearchV
             }
         });
         fastScroller.setRecyclerView(mRecyclerView);
-        fastScroller.setViewsToUse(R.layout.recycler_view_fast_scroller_fast_scroller, R.id.fastscroller_bubble, R.id.fastscroller_handle);
+        fastScroller.setViewsToUse(R.layout.fast_scroller, R.id.fastscroller_bubble, R.id.fastscroller_handle);
     }
 
     @Override

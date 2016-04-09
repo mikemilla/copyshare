@@ -4,7 +4,8 @@
     <color name="primary">#F54A15</color>
     <color name="accent">#3D5AFE</color>
     <color name="background">#BF000000</color>
-    <color name="ripple">#1A000000</color>
+    <color name="flat_shadow">#1A000000</color>
+    <color name="ripple">#42000000</color>
     <color name="white">#FFFFFF</color>
     <color name="border">#E0E0E0</color>
     <color name="edit_text_background">#F6F6F6</color>
@@ -13,4 +14,6 @@
     <color name="green">#4CAF50</color>
     <color name="orange">#FF5722</color>
     <color name="purple">#673AB7</color>
+    <color name="selected">#1CC852</color>
+    <color name="selected_border">#30D864</color>
 </resources>

@@ -36,7 +36,7 @@
         android:layout_width="match_parent"
         android:layout_height="2dp"
         android:layout_below="@+id/toolbar"
-        android:background="@color/ripple" />
+        android:background="@color/flat_shadow" />
 
     <com.mikemilla.copyshare.lists.RecyclerViewFastScroller
         android:id="@+id/fastscroller"
@@ -48,36 +48,5 @@
         android:layout_alignTop="@id/recyclerview"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:layout_marginTop="@dimen/activity_vertical_margin" />
-
-    <!--
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <xyz.danoz.recyclerviewfastscroller.vertical.VerticalRecyclerViewFastScroller
-        android:id="@+id/fast_scroller"
-        android:layout_width="56dp"
-        android:layout_height="match_parent"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true" />
-
-    <com.mikemilla.copyshare.ColorGroupSectionTitleIndicator
-        android:id="@+id/fast_scroller_section_title_indicator"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/list_item_height"
-        android:layout_toLeftOf="@id/fast_scroller"
-        android:layout_toStartOf="@id/fast_scroller"
-        recyclerviewfastscroller:rfs_backgroundColor="@color/primary"
-        recyclerviewfastscroller:rfs_textColor="@color/white" />
-        -->
-
-    <!--
-    <ListView
-        android:id="@+id/list_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fastScrollEnabled="true" />
-        -->
 
 </RelativeLayout>

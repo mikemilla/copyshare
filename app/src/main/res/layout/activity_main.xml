@@ -37,25 +37,58 @@
                     android:layout_height="2dp"
                     android:background="@color/border" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="56dp"
-                    android:orientation="horizontal">
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="2dp">
 
                     <com.mikemilla.copyshare.views.StyledTextView
-                        android:id="@+id/share_to_text_view"
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
+                        android:id="@+id/share_with_tip"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_toLeftOf="@+id/more_button"
+                        android:ellipsize="end"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:paddingLeft="@dimen/sixteen"
+                        android:paddingRight="@dimen/sixteen"
+                        android:paddingTop="@dimen/sixteen"
+                        android:text="@string/share_to_text"
                         android:textColor="@color/text_color"
                         android:textSize="18sp" />
 
+                    <com.mikemilla.copyshare.views.StyledTextView
+                        android:id="@+id/copied_text_view"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/share_with_tip"
+                        android:layout_toLeftOf="@+id/more_button"
+                        android:ellipsize="end"
+                        android:gravity="center_vertical"
+                        android:maxLines="1"
+                        android:paddingBottom="@dimen/sixteen"
+                        android:paddingLeft="@dimen/sixteen"
+                        android:paddingRight="@dimen/sixteen"
+                        android:paddingTop="@dimen/eight"
+                        android:textColor="@color/ripple"
+                        android:textSize="14sp" />
+
+                    <com.mikemilla.copyshare.views.StyledImageButton
+                        android:id="@+id/more_button"
+                        android:layout_width="@dimen/fifty_six"
+                        android:layout_height="@dimen/fifty_six"
+                        android:layout_alignParentRight="true"
+                        android:layout_centerVertical="true"
+                        android:src="@android:drawable/ic_btn_speak_now" />
+
                     <Switch
                         android:id="@+id/service_switch"
-                        android:layout_width="56dp"
-                        android:layout_height="56dp" />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:visibility="gone" />
 
-                </LinearLayout>
+                </RelativeLayout>
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/recycler_view"
@@ -66,10 +99,24 @@
                     android:id="@+id/edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="start|center_vertical"
                     android:layout_margin="@dimen/eight"
                     android:background="@drawable/edit_text_background"
-                    android:padding="@dimen/sixteen"
+                    android:hint="@string/edit_text_hint"
+                    android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
+                    android:maxHeight="@dimen/eighty_eight"
+                    android:minHeight="@dimen/fifty_two"
+                    android:paddingLeft="@dimen/sixteen"
+                    android:paddingRight="@dimen/sixteen"
+                    android:scrollbars="vertical"
+                    android:textColorHint="@color/ripple"
                     android:textSize="16sp" />
+
+                <View
+                    android:id="@+id/button_divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="2dp"
+                    android:background="@color/border" />
 
                 <FrameLayout
                     android:id="@+id/action_button"

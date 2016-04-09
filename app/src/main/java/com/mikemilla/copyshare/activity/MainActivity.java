@@ -2,6 +2,7 @@ package com.mikemilla.copyshare.activity;
 
 import android.Manifest;
 import android.app.ActivityManager;
+import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,6 +23,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
@@ -34,10 +36,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mikemilla.copyshare.R;
+import com.mikemilla.copyshare.data.ContactModel;
 import com.mikemilla.copyshare.data.Defaults;
 import com.mikemilla.copyshare.data.FrequentContactAmount;
-import com.mikemilla.copyshare.data.ContactModel;
-import com.mikemilla.copyshare.lists.SendingRecyclerAdapter;
+import com.mikemilla.copyshare.lists.ContactSendingAdapter;
 import com.mikemilla.copyshare.service.ClipboardService;
 import com.mikemilla.copyshare.views.StyledEditText;
 import com.mikemilla.copyshare.views.StyledTextView;
@@ -50,16 +52,18 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private Animation slideUp, fadeIn;
-    private View background;
+    private View background, divider;
     private BottomSheetBehavior<FrameLayout> mBottomSheetBehavior;
     private FrameLayout mBottomSheet, mActionButton;
     private LinearLayoutManager mLayoutManager;
     private RecyclerView mRecyclerView;
-    private StyledTextView mShareToTextView, mActionTextView;
+    private StyledTextView mCopiedTextView, mActionTextView, mShareToTextView;
     private StyledEditText mEditText;
+    private CoordinatorLayout mCoordinatorLayout;
     private boolean didPressSend = false;
-    private boolean developerMode = true;
+    private boolean SendSMS = false;
 
+    public static List<Drawable> contactColors = new ArrayList<>();
     public List<Integer> selectedIndexes = new ArrayList<>();
     public List<ContactModel> mSendingQueue = new ArrayList<>();
 
@@ -83,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 if (updatedContactList != null) {
                     updatedContactList.remove(index);
                     updatedContactList.add(0, mSendingQueue.get(i));
+                    updatedContactList.get(0).setSelected(false);
                 }
             }
             Defaults.storeContacts(MainActivity.this, updatedContactList);
@@ -93,15 +98,13 @@ public class MainActivity extends AppCompatActivity {
 
             // Send SMS
             for (int i = 0; i < mSendingQueue.size(); i++) {
-                if (!developerMode) {
+                if (SendSMS) {
                     SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
-                            mEditText.getText().toString(), null, null);
+                            mCopiedTextView.getText().toString() + " " + mEditText.getText().toString(), null, null);
                 }
             }
         }
     };
-
-    public static List<Drawable> contactColors = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,11 +121,13 @@ public class MainActivity extends AppCompatActivity {
         createAnimations();
 
         // Setup Bottom Sheet
-        CoordinatorLayout mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
+        mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
         background = findViewById(R.id.background);
         mBottomSheet = (FrameLayout) (mCoordinatorLayout != null ? mCoordinatorLayout.findViewById(R.id.bottom_sheet) : null);
         assert mBottomSheet != null;
         mBottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
+
+        divider = findViewById(R.id.button_divider);
 
         // Closes sheet on background click
         background.setOnClickListener(new View.OnClickListener() {
@@ -137,7 +142,8 @@ public class MainActivity extends AppCompatActivity {
         mBottomSheet.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
-                mBottomSheetBehavior.setPeekHeight(mBottomSheet.getMeasuredHeight());
+                mBottomSheetBehavior.setPeekHeight(mBottomSheet.getMeasuredHeight()
+                        + (int) getResources().getDimension(R.dimen.edit_text_height_fix));
             }
         });
 
@@ -190,16 +196,38 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView = (RecyclerView) findViewById(R.id.recycler_view);
 
         // Text View at top
-        mShareToTextView = (StyledTextView) findViewById(R.id.share_to_text_view);
+        mCopiedTextView = (StyledTextView) findViewById(R.id.copied_text_view);
+        mShareToTextView = (StyledTextView) findViewById(R.id.share_with_tip);
 
         // Setup the edit text
         mEditText = (StyledEditText) findViewById(R.id.edit_text);
+
+        // Allow edit text to scroll in the bottoms sheet
+        mEditText.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                mEditText.getParent().requestDisallowInterceptTouchEvent(true);
+                switch (event.getAction() & MotionEvent.ACTION_MASK) {
+                    case MotionEvent.ACTION_UP: {
+                        mEditText.getParent().requestDisallowInterceptTouchEvent(false);
+                        break;
+                    }
+                }
+                return false;
+            }
+        });
+
         if (getIntent().getExtras() != null) {
             String link = getIntent().getExtras().getString(ClipboardService.GET_LINK);
-            mEditText.setText(link);
+            mCopiedTextView.setText(link);
         } else {
-            assert mEditText != null;
-            mEditText.setVisibility(View.GONE);
+            ClipboardManager clipBoard = (ClipboardManager) getSystemService(CLIPBOARD_SERVICE);
+            if (clipBoard.hasPrimaryClip()) {
+                String copy = clipBoard.getPrimaryClip().getItemAt(0).getText().toString();
+                mCopiedTextView.setText(copy);
+            } else {
+                mCopiedTextView.setText("Nothing Copied :(");
+            }
         }
 
         // Text View as Button
@@ -230,7 +258,7 @@ public class MainActivity extends AppCompatActivity {
                         0);
 
             } else {
-                SendingRecyclerAdapter adapter = new SendingRecyclerAdapter(this, Defaults.loadContacts(this));
+                ContactSendingAdapter adapter = new ContactSendingAdapter(this, Defaults.loadContacts(this));
                 if (mRecyclerView != null) {
                     mRecyclerView.setAdapter(adapter);
                     mRecyclerView.setLayoutManager(mLayoutManager);
@@ -271,20 +299,19 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setButtonViewContactInfo() {
         if (mSendingQueue.size() > 0) {
-
-            List<String> numbers = new ArrayList<>();
-            for (ContactModel contact : mSendingQueue) {
-                numbers.add(contact.getName() + ", " + contact.getNumber());
-            }
-
-            mShareToTextView.setText(numbers.toString());
+            mShareToTextView.setText(getResources().getString(R.string.share_to_text)
+                    + " (" + mSendingQueue.size() + ")");
+            divider.setVisibility(View.GONE);
+            mEditText.setVisibility(View.VISIBLE);
             mActionButton.setOnClickListener(mSendClick);
             mActionTextView.setText(R.string.send);
             mActionTextView.setText(R.string.send);
             mActionTextView.setTextColor(ContextCompat.getColor(this, R.color.white));
             mActionTextView.setBackgroundColor(ContextCompat.getColor(this, R.color.accent));
         } else {
-            mShareToTextView.setText(null);
+            mShareToTextView.setText(getResources().getString(R.string.share_to_text));
+            divider.setVisibility(View.VISIBLE);
+            mEditText.setVisibility(View.GONE);
             mActionButton.setOnClickListener(mCancelClick);
             mActionTextView.setText(R.string.cancel);
             mActionTextView.setTextColor(ContextCompat.getColor(this, R.color.text_color));
@@ -344,7 +371,7 @@ public class MainActivity extends AppCompatActivity {
         Defaults.storeContacts(this, contactList);
 
         // Set the adapter based on the most popular connections
-        SendingRecyclerAdapter adapter = new SendingRecyclerAdapter(this, contactList);
+        ContactSendingAdapter adapter = new ContactSendingAdapter(this, contactList);
         if (mRecyclerView != null) {
             mRecyclerView.setAdapter(adapter);
             mRecyclerView.setLayoutManager(mLayoutManager);
@@ -467,7 +494,7 @@ public class MainActivity extends AppCompatActivity {
         if (mRecyclerView != null) {
 
             // Update the view
-            SendingRecyclerAdapter adapter = new SendingRecyclerAdapter(this, Defaults.loadContacts(this));
+            ContactSendingAdapter adapter = new ContactSendingAdapter(this, Defaults.loadContacts(this));
             mRecyclerView.setAdapter(adapter);
             mRecyclerView.setLayoutManager(mLayoutManager);
 

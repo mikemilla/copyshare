@@ -17,19 +17,19 @@ import java.util.List;
  * User: Xaver
  * Date: 24/05/15
  */
-public class ContactAdapter extends RecyclerView.Adapter<ContactViewHolder> implements RecyclerViewFastScroller.BubbleTextGetter {
+public class ContactAddingAdapter extends RecyclerView.Adapter<ContactViewHolder> implements RecyclerViewFastScroller.BubbleTextGetter {
 
     private final LayoutInflater mInflater;
     private final List<ContactModel> mModels;
 
-    public ContactAdapter(Context context, List<ContactModel> models) {
+    public ContactAddingAdapter(Context context, List<ContactModel> models) {
         mInflater = LayoutInflater.from(context);
         mModels = new ArrayList<>(models);
     }
 
     @Override
     public ContactViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        final View itemView = mInflater.inflate(R.layout.recycler_contact, parent, false);
+        final View itemView = mInflater.inflate(R.layout.contact_item, parent, false);
         return new ContactViewHolder(itemView);
     }
 

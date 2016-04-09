@@ -1,10 +1,11 @@
 <resources>
     <string name="app_name">CopyShare</string>
-    <string name="send">Send</string>
+    <string name="send">Send SMS</string>
     <string name="cancel">Cancel</string>
     <string name="search_contacts">Search Contacts</string>
-    <!--<string name="font">fonts/Arvo-Regular.ttf</string>-->
     <string name="font">fonts/Montserrat-Regular.otf</string>
     <string name="add_contacts">Add Contacts</string>
     <string name="add_contact">Add Contact</string>
+    <string name="edit_text_hint">Say Something…</string>
+    <string name="share_to_text">Send copy to</string>
 </resources>

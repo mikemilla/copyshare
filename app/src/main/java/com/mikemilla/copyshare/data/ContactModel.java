@@ -17,6 +17,7 @@ public class ContactModel {
     private List<String> numbers;
     private String number;
     private int drawable;
+    private boolean selected = false;
 
     public ContactModel(String picture, String name, List<String> numbers, String number) {
         this.picture = picture;
@@ -24,6 +25,14 @@ public class ContactModel {
         this.numbers = numbers;
         this.number = number;
         this.drawable = setRandomInt();
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
+    }
+
+    public boolean getSelected() {
+        return selected;
     }
 
     public String getNumber() {

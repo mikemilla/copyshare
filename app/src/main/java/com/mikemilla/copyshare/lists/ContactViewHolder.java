@@ -1,6 +1,7 @@
 package com.mikemilla.copyshare.lists;
 
 import android.content.DialogInterface;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v7.app.AlertDialog;
@@ -9,7 +10,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.activity.MainActivity;
@@ -87,6 +91,17 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
                         }
                         Defaults.storeContacts(itemView.getContext(), contactList);
                         mDialog.dismiss();
+
+                        // Create the styled toast
+                        Toast toast = Toast.makeText(itemView.getContext(),
+                                "Added " + model.getName() + " to share list",
+                                Toast.LENGTH_SHORT);
+                        LinearLayout toastLayout = (LinearLayout) toast.getView();
+                        TextView textView = (TextView) toastLayout.getChildAt(0);
+                        Typeface tf = Typeface.createFromAsset(itemView.getContext().getAssets(),
+                                itemView.getContext().getResources().getString(R.string.font));
+                        textView.setTypeface(tf);
+                        toast.show();
                     }
                 });
 
