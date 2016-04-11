@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private StyledEditText mEditText;
     private CoordinatorLayout mCoordinatorLayout;
     private boolean didPressSend = false;
-    private boolean SendSMS = false;
+    private boolean SendSMS = true;
 
     public static List<Drawable> contactColors = new ArrayList<>();
     public List<Integer> selectedIndexes = new ArrayList<>();
