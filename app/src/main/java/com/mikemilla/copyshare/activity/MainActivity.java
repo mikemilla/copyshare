@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.CallLog;
@@ -51,6 +50,8 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static String CONTACT_CHANGE = "CONTACT_CHANGE";
+
     private Animation slideUp, fadeIn;
     private View background, divider;
     private BottomSheetBehavior<FrameLayout> mBottomSheetBehavior;
@@ -63,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
     private boolean didPressSend = false;
     private boolean SendSMS = true;
 
-    public static List<Drawable> contactColors = new ArrayList<>();
     public List<Integer> selectedIndexes = new ArrayList<>();
     public List<ContactModel> mSendingQueue = new ArrayList<>();
 
@@ -110,12 +110,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Should move this
-        contactColors.add(ContextCompat.getDrawable(this, R.drawable.circle_blue));
-        contactColors.add(ContextCompat.getDrawable(this, R.drawable.circle_green));
-        contactColors.add(ContextCompat.getDrawable(this, R.drawable.circle_purple));
-        contactColors.add(ContextCompat.getDrawable(this, R.drawable.circle_orange));
 
         // Load the animations
         createAnimations();
@@ -258,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
                         0);
 
             } else {
-                ContactSendingAdapter adapter = new ContactSendingAdapter(this, Defaults.loadContacts(this));
+                ContactSendingAdapter adapter = new ContactSendingAdapter(this, Defaults.loadContacts(this), 0);
                 if (mRecyclerView != null) {
                     mRecyclerView.setAdapter(adapter);
                     mRecyclerView.setLayoutManager(mLayoutManager);
@@ -299,8 +293,29 @@ public class MainActivity extends AppCompatActivity {
      */
     public void setButtonViewContactInfo() {
         if (mSendingQueue.size() > 0) {
+
+            List<String> selectedNames = new ArrayList<>();
+            for (int i = 0; i < mSendingQueue.size(); i++) {
+
+                String fullName = mSendingQueue.get(i).getName();
+                if (fullName.contains(" ")) {
+                    String name = fullName.substring(0, fullName.indexOf(" "));
+                    selectedNames.add(name);
+                }
+            }
+
+            //mShareToTextView.setText(getResources().getString(R.string.share_to_text)
+            //+ " (" + mSendingQueue.size() + ")");
+
+            String listOfNames = selectedNames.toString()
+                    .replace("[", "")  //remove the right bracket
+                    .replace("]", "")  //remove the left bracket
+                    .trim();
+
             mShareToTextView.setText(getResources().getString(R.string.share_to_text)
-                    + " (" + mSendingQueue.size() + ")");
+                    + " " + listOfNames);
+
+
             divider.setVisibility(View.GONE);
             mEditText.setVisibility(View.VISIBLE);
             mActionButton.setOnClickListener(mSendClick);
@@ -371,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
         Defaults.storeContacts(this, contactList);
 
         // Set the adapter based on the most popular connections
-        ContactSendingAdapter adapter = new ContactSendingAdapter(this, contactList);
+        ContactSendingAdapter adapter = new ContactSendingAdapter(this, contactList, ContactsActivity.numberOfContactsAdded);
         if (mRecyclerView != null) {
             mRecyclerView.setAdapter(adapter);
             mRecyclerView.setLayoutManager(mLayoutManager);
@@ -487,21 +502,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                if (data.getBooleanExtra(CONTACT_CHANGE, false)) {
 
-        // Reload RecyclerView onResume
-        if (mRecyclerView != null) {
+                    // Update the view
+                    ContactSendingAdapter adapter = new ContactSendingAdapter(this,
+                            Defaults.loadContacts(this), ContactsActivity.numberOfContactsAdded);
+                    mRecyclerView.setAdapter(adapter);
+                    mRecyclerView.setLayoutManager(mLayoutManager);
 
-            // Update the view
-            ContactSendingAdapter adapter = new ContactSendingAdapter(this, Defaults.loadContacts(this));
-            mRecyclerView.setAdapter(adapter);
-            mRecyclerView.setLayoutManager(mLayoutManager);
+                    // Remove the lists and update UI
+                    selectedIndexes.clear();
+                    mSendingQueue.clear();
+                    setButtonViewContactInfo();
 
-            // Remove the lists and update UI
-            selectedIndexes.clear();
-            mSendingQueue.clear();
-            setButtonViewContactInfo();
+                    ContactsActivity.numberOfContactsAdded = 0;
+                }
+            }
         }
     }
 }

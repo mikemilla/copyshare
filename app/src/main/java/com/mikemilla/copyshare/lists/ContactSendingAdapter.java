@@ -5,6 +5,8 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,7 +23,6 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.activity.ContactsActivity;
@@ -43,24 +44,28 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
     public List<ContactModel> mContactsList = new ArrayList<>();
     private MainActivity mMainActivity;
 
-    public ContactSendingAdapter(MainActivity activity, List<ContactModel> contactList) {
+    public ContactSendingAdapter(MainActivity activity, List<ContactModel> contactList, int numberOfContactsAdded) {
         super();
+
         mMainActivity = activity;
         mContactsList = contactList;
+
+        // Select new contacts
+        for (int i = 0; i < numberOfContactsAdded; i++) {
+            mContactsList.get(i).setSelected(true);
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        LinearLayout container;
-        CircleImageView imageView;
-        StyledTextView textView;
-        StyledTextView contactLetterText;
-        ImageView check;
-        Animation scaleIn, scaleOut;
+        private final CircleImageView imageView;
+        private final StyledTextView textView;
+        private final StyledTextView contactLetterText;
+        private final ImageView check;
+        private final Animation scaleIn, scaleOut;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            container = (LinearLayout) itemView.findViewById(R.id.container);
             imageView = (CircleImageView) itemView.findViewById(R.id.contact_image);
             contactLetterText = (StyledTextView) itemView.findViewById(R.id.contact_letter_text);
             textView = (StyledTextView) itemView.findViewById(R.id.text_view);
@@ -101,8 +106,9 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(mMainActivity, ContactsActivity.class);
-                    mMainActivity.startActivity(intent);
+                    Intent intent = new Intent();
+                    intent.setClass(mMainActivity, ContactsActivity.class);
+                    mMainActivity.startActivityForResult(intent, 1); // For sending if there is a change back to main
                 }
             });
         }
@@ -143,13 +149,20 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
                     item.contactLetterText.setVisibility(View.VISIBLE);
                     item.contactLetterText.setText(mContactsList.get(i).getNameLetter());
 
+                    // Drawable Array Reference
+                    Resources res = item.itemView.getResources();
+                    TypedArray circles = res.obtainTypedArray(R.array.circles);
+
                     if (Build.VERSION.SDK_INT >= 16) {
-                        item.contactLetterText.setBackground(
-                                MainActivity.contactColors.get(mContactsList.get(i).getColor()));
+                        item.contactLetterText.setBackground(circles.getDrawable(
+                                mContactsList.get(i).getColor()));
                     } else {
-                        item.contactLetterText.setBackgroundDrawable(
-                                MainActivity.contactColors.get(mContactsList.get(i).getColor()));
+                        item.contactLetterText.setBackgroundDrawable(circles.getDrawable(
+                                mContactsList.get(i).getColor()));
                     }
+
+                    // Recycle the array
+                    circles.recycle();
                 }
 
                 // Touches
@@ -201,6 +214,7 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
 
                         // Update the UI
                         mMainActivity.setButtonViewContactInfo();
+
                     }
                 });
 
@@ -246,7 +260,27 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
                 });
 
             } else if (viewHolder instanceof FooterViewHolder) {
+
                 FooterViewHolder item = (FooterViewHolder) viewHolder;
+
+                // Touches
+                item.itemView.setOnTouchListener(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        switch (event.getAction()) {
+                            case MotionEvent.ACTION_DOWN: {
+                                v.setAlpha(0.7f);
+                                break;
+                            }
+                            case MotionEvent.ACTION_UP:
+                            case MotionEvent.ACTION_CANCEL: {
+                                v.setAlpha(1f);
+                                break;
+                            }
+                        }
+                        return false;
+                    }
+                });
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,7 +1,5 @@
 package com.mikemilla.copyshare.data;
 
-import com.mikemilla.copyshare.activity.MainActivity;
-
 import java.util.List;
 import java.util.Random;
 
@@ -69,7 +67,7 @@ public class ContactModel {
 
     private int setRandomInt() {
         int min = 0;
-        int max = MainActivity.contactColors.size() - 1;
+        int max = 4 - 1;
         Random r = new Random();
         return r.nextInt(max - min + 1) + min;
     }

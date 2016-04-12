@@ -1,6 +1,8 @@
 package com.mikemilla.copyshare.lists;
 
 import android.content.DialogInterface;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
@@ -16,7 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.mikemilla.copyshare.R;
-import com.mikemilla.copyshare.activity.MainActivity;
+import com.mikemilla.copyshare.activity.ContactsActivity;
 import com.mikemilla.copyshare.data.ContactModel;
 import com.mikemilla.copyshare.data.Defaults;
 import com.mikemilla.copyshare.views.StyledTextView;
@@ -51,11 +53,20 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
             contactLetter.setVisibility(View.VISIBLE);
             contactLetter.setText(model.getNameLetter());
 
+            // Drawable Array Reference
+            Resources res = itemView.getContext().getResources();
+            TypedArray circles = res.obtainTypedArray(R.array.circles);
+
             if (Build.VERSION.SDK_INT >= 16) {
-                contactLetter.setBackground(MainActivity.contactColors.get(model.getColor()));
+                contactLetter.setBackground(circles.getDrawable(
+                        model.getColor()));
             } else {
-                contactLetter.setBackgroundDrawable(MainActivity.contactColors.get(model.getColor()));
+                contactLetter.setBackgroundDrawable(circles.getDrawable(
+                        model.getColor()));
             }
+
+            // Recycle the array
+            circles.recycle();
         }
 
         itemView.setOnClickListener(new View.OnClickListener() {
@@ -85,12 +96,17 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
                 listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
                         List<ContactModel> contactList = Defaults.loadContacts(itemView.getContext());
                         if (contactList != null) {
-                            contactList.add(new ContactModel(null, model.getName(), null, model.getNumbers().get(position)));
+                            contactList.add(0, new ContactModel(null, model.getName(), null, model.getNumbers().get(position)));
                         }
+
                         Defaults.storeContacts(itemView.getContext(), contactList);
                         mDialog.dismiss();
+
+                        // Add contacts to the list of added new contacts
+                        ContactsActivity.numberOfContactsAdded += 1;
 
                         // Create the styled toast
                         Toast toast = Toast.makeText(itemView.getContext(),

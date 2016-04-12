@@ -1,5 +1,6 @@
 package com.mikemilla.copyshare.activity;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.os.Build;
@@ -15,8 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.mikemilla.copyshare.R;
-import com.mikemilla.copyshare.lists.ContactAddingAdapter;
 import com.mikemilla.copyshare.data.ContactModel;
+import com.mikemilla.copyshare.lists.ContactAddingAdapter;
 import com.mikemilla.copyshare.lists.RecyclerViewFastScroller;
 import com.mikemilla.copyshare.views.StyledSearchView;
 
@@ -24,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ContactsActivity extends AppCompatActivity implements StyledSearchView.OnQueryTextListener {
+
+    public static int numberOfContactsAdded = 0;
 
     private RecyclerView mRecyclerView;
     private List<ContactModel> mModels;
@@ -176,5 +179,17 @@ public class ContactsActivity extends AppCompatActivity implements StyledSearchV
             return contacts;
         }
         return null;
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if (numberOfContactsAdded > 0) {
+            Intent intent = new Intent();
+            intent.putExtra(MainActivity.CONTACT_CHANGE, true);
+            setResult(RESULT_OK, intent);
+        }
+
+        super.onBackPressed();
     }
 }

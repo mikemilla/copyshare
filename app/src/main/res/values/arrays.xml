@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="circles">
+        <item>@drawable/circle_green</item>
+        <item>@drawable/circle_blue</item>
+        <item>@drawable/circle_orange</item>
+        <item>@drawable/circle_purple</item>
+    </array>
+</resources>
