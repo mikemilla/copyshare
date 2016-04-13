@@ -46,7 +46,7 @@
                 android:background="@drawable/circle_selected"
                 android:scaleType="centerInside"
                 android:visibility="gone"
-                app:srcCompat="@drawable/ic_check_18px"
+                app:srcCompat="@drawable/ic_check"
                 tools:ignore="MissingPrefix" />
 
         </RelativeLayout>

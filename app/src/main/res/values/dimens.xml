@@ -11,4 +11,5 @@
     <dimen name="eight">8dp</dimen>
     <dimen name="edit_text_height_fix">60dp</dimen>
     <dimen name="fifty_two">52dp</dimen>
+    <dimen name="forty">40dp</dimen>
 </resources>

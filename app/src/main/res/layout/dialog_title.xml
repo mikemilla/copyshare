@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/seventy_two">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/dialog_image_view"
+            android:layout_width="@dimen/forty"
+            android:layout_height="@dimen/forty"
+            android:layout_margin="@dimen/sixteen"
+            app:civ_border_color="@color/border"
+            app:civ_border_width="2dp" />
+
+        <com.mikemilla.copyshare.views.StyledTextView
+            android:id="@+id/dialog_letter"
+            android:layout_width="@dimen/forty"
+            android:layout_height="@dimen/forty"
+            android:layout_margin="@dimen/sixteen"
+            android:gravity="center"
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:visibility="invisible" />
+
+        <com.mikemilla.copyshare.views.StyledTextView
+            android:id="@+id/dialog_text_view"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/sixteen"
+            android:layout_toRightOf="@+id/dialog_image_view"
+            android:gravity="center_vertical"
+            android:lineSpacingMultiplier="1.1"
+            android:maxLines="2"
+            android:textColor="@color/text_color"
+            android:textSize="18sp" />
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/border" />
+
+</LinearLayout>

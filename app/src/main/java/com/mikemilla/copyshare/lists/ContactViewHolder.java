@@ -6,6 +6,7 @@ import android.content.res.TypedArray;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -24,6 +25,8 @@ import com.mikemilla.copyshare.data.Defaults;
 import com.mikemilla.copyshare.views.StyledTextView;
 
 import java.util.List;
+
+import de.hdodenhof.circleimageview.CircleImageView;
 
 public class ContactViewHolder extends RecyclerView.ViewHolder {
 
@@ -73,17 +76,57 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
             @Override
             public void onClick(View v) {
 
+                final Typeface typeface = Typeface.createFromAsset(itemView.getContext().getAssets(),
+                        itemView.getContext().getResources().getString(R.string.font));
+
                 // Setup the list of items
                 LayoutInflater inflater = LayoutInflater.from(itemView.getContext());
-                final View contactMeansView = inflater.inflate(R.layout.add_contact_list, null);
+                final View contactMeansView = inflater.inflate(R.layout.dialog_list, null);
                 ListView listView = (ListView) contactMeansView.findViewById(R.id.list_view);
                 ContactDialogAdapter adapter = new ContactDialogAdapter(
-                        itemView.getContext(), R.layout.dialog_means_item, model.getNumbers());
+                        itemView.getContext(), R.layout.dialog_list_item, model.getNumbers());
                 listView.setAdapter(adapter);
+
+                // Get the dialog Title View
+                final View dialogTitle = inflater.inflate(R.layout.dialog_title, null);
+                StyledTextView dialogTextView = (StyledTextView) dialogTitle.findViewById(R.id.dialog_text_view);
+                CircleImageView dialogImageView = (CircleImageView) dialogTitle.findViewById(R.id.dialog_image_view);
+                StyledTextView dialogLetter = (StyledTextView) dialogTitle.findViewById(R.id.dialog_letter);
+
+                // Set the dialog title info
+                dialogTextView.setText(model.getName());
+
+                // Set Image or Other
+                if (model.getPicture() != null) {
+                    Uri image = Uri.parse(model.getPicture());
+                    dialogImageView.setImageURI(image);
+                    dialogImageView.setVisibility(View.VISIBLE);
+                    dialogLetter.setVisibility(View.INVISIBLE);
+                } else {
+                    dialogImageView.setImageBitmap(null);
+                    dialogImageView.setVisibility(View.INVISIBLE);
+                    dialogLetter.setVisibility(View.VISIBLE);
+                    dialogLetter.setText(model.getNameLetter());
+
+                    // Drawable Array Reference
+                    Resources res = itemView.getContext().getResources();
+                    TypedArray circles = res.obtainTypedArray(R.array.circles);
+
+                    if (Build.VERSION.SDK_INT >= 16) {
+                        dialogLetter.setBackground(circles.getDrawable(
+                                model.getColor()));
+                    } else {
+                        dialogLetter.setBackgroundDrawable(circles.getDrawable(
+                                model.getColor()));
+                    }
+
+                    // Recycle the array
+                    circles.recycle();
+                }
 
                 // Setup Dialog
                 final AlertDialog mDialog = new AlertDialog.Builder(itemView.getContext())
-                        .setTitle("Add " + model.getName())
+                        .setCustomTitle(dialogTitle)
                         .setView(contactMeansView)
                         .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                             @Override
@@ -114,15 +157,17 @@ public class ContactViewHolder extends RecyclerView.ViewHolder {
                                 Toast.LENGTH_SHORT);
                         LinearLayout toastLayout = (LinearLayout) toast.getView();
                         TextView textView = (TextView) toastLayout.getChildAt(0);
-                        Typeface tf = Typeface.createFromAsset(itemView.getContext().getAssets(),
-                                itemView.getContext().getResources().getString(R.string.font));
-                        textView.setTypeface(tf);
+                        textView.setTypeface(typeface);
                         toast.show();
                     }
                 });
 
                 // Show the dialog
                 mDialog.show();
+
+                // Change the dialog button text
+                mDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTypeface(typeface);
+                mDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(itemView.getContext(), R.color.accent));
             }
         });
     }

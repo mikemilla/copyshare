@@ -10,10 +10,12 @@ import android.content.res.TypedArray;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -23,6 +25,9 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.activity.ContactsActivity;
@@ -44,16 +49,10 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
     public List<ContactModel> mContactsList = new ArrayList<>();
     private MainActivity mMainActivity;
 
-    public ContactSendingAdapter(MainActivity activity, List<ContactModel> contactList, int numberOfContactsAdded) {
+    public ContactSendingAdapter(MainActivity activity, List<ContactModel> contactList) {
         super();
-
         mMainActivity = activity;
         mContactsList = contactList;
-
-        // Select new contacts
-        for (int i = 0; i < numberOfContactsAdded; i++) {
-            mContactsList.get(i).setSelected(true);
-        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
@@ -227,18 +226,68 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
                         Vibrator vibrate = (Vibrator) mMainActivity.getSystemService(Context.VIBRATOR_SERVICE);
                         vibrate.vibrate(20);
 
-                        new AlertDialog.Builder(mMainActivity)
-                                .setTitle("Remove Contact")
+                        final Typeface typeface = Typeface.createFromAsset(mMainActivity.getAssets(),
+                                mMainActivity.getResources().getString(R.string.font));
+
+                        // Get the dialog Title View
+                        LayoutInflater inflater = LayoutInflater.from(mMainActivity);
+                        final View dialogTitle = inflater.inflate(R.layout.dialog_title, null);
+                        StyledTextView dialogTextView = (StyledTextView) dialogTitle.findViewById(R.id.dialog_text_view);
+                        CircleImageView dialogImageView = (CircleImageView) dialogTitle.findViewById(R.id.dialog_image_view);
+                        StyledTextView dialogLetter = (StyledTextView) dialogTitle.findViewById(R.id.dialog_letter);
+
+                        // Set the dialog title info
+                        dialogTextView.setText("Remove " + mContactsList.get(i).getName() + " from share list?");
+
+                        // Set Image or Other
+                        if (getContactPhoto(mContactsList.get(i).getNumber()) != null) {
+                            dialogImageView.setVisibility(View.VISIBLE);
+                            dialogImageView.setImageBitmap(getContactPhoto(mContactsList.get(i).getNumber()));
+                            dialogLetter.setVisibility(View.INVISIBLE);
+                        } else {
+                            dialogImageView.setVisibility(View.INVISIBLE);
+                            dialogLetter.setVisibility(View.VISIBLE);
+                            dialogLetter.setText(mContactsList.get(i).getNameLetter());
+
+                            // Drawable Array Reference
+                            Resources res = item.itemView.getResources();
+                            TypedArray circles = res.obtainTypedArray(R.array.circles);
+
+                            if (Build.VERSION.SDK_INT >= 16) {
+                                dialogLetter.setBackground(circles.getDrawable(
+                                        mContactsList.get(i).getColor()));
+                            } else {
+                                dialogLetter.setBackgroundDrawable(circles.getDrawable(
+                                        mContactsList.get(i).getColor()));
+                            }
+
+                            // Recycle the array
+                            circles.recycle();
+                        }
+
+                        // Setup Dialog
+                        final AlertDialog mDialog = new AlertDialog.Builder(mMainActivity)
+                                .setCustomTitle(dialogTitle)
                                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
                                         //
                                     }
                                 })
-                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                .setPositiveButton("Remove", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
 
+                                        // Create the styled toast
+                                        Toast toast = Toast.makeText(mMainActivity,
+                                                "Removed " + mContactsList.get(i).getName() + " from share list",
+                                                Toast.LENGTH_SHORT);
+                                        LinearLayout toastLayout = (LinearLayout) toast.getView();
+                                        TextView textView = (TextView) toastLayout.getChildAt(0);
+                                        textView.setTypeface(typeface);
+                                        toast.show();
+
+                                        // Remove from lists
                                         List<ContactModel> updatedContactList = Defaults.loadContacts(mMainActivity);
                                         if (updatedContactList != null) {
                                             updatedContactList.remove(i);
@@ -253,7 +302,16 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
 
                                         mMainActivity.setButtonViewContactInfo();
                                     }
-                                }).show();
+                                }).create();
+
+                        // Show the dialog
+                        mDialog.show();
+
+                        // Change the dialog button text
+                        mDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTypeface(typeface);
+                        mDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(mMainActivity, R.color.accent));
+                        mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTypeface(typeface);
+                        mDialog.getButton(DialogInterface.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(mMainActivity, R.color.accent));
 
                         return false;
                     }

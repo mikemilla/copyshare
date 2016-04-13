@@ -6,9 +6,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.TextView;
 
 import com.mikemilla.copyshare.R;
+import com.mikemilla.copyshare.views.StyledTextView;
 
 import java.util.List;
 
@@ -41,7 +41,7 @@ public class ContactDialogAdapter extends ArrayAdapter<String> {
             row = inflater.inflate(layoutResourceId, parent, false);
 
             holder = new MeansHolder();
-            holder.meansText = (TextView) row.findViewById(R.id.contact_means);
+            holder.meansText = (StyledTextView) row.findViewById(R.id.contact_means);
 
             row.setTag(holder);
         } else {
@@ -54,7 +54,7 @@ public class ContactDialogAdapter extends ArrayAdapter<String> {
     }
 
     static class MeansHolder {
-        TextView meansText;
+        StyledTextView meansText;
     }
 
     @Override

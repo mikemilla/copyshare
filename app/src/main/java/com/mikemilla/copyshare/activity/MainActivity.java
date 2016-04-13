@@ -29,6 +29,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.CompoundButton;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Switch;
 import android.widget.TextView;
@@ -122,6 +123,15 @@ public class MainActivity extends AppCompatActivity {
         mBottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
 
         divider = findViewById(R.id.button_divider);
+
+        ImageView mMoreButton = (ImageView) findViewById(R.id.more_button);
+        assert mMoreButton != null;
+        mMoreButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "Dope", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // Closes sheet on background click
         background.setOnClickListener(new View.OnClickListener() {
@@ -252,7 +262,7 @@ public class MainActivity extends AppCompatActivity {
                         0);
 
             } else {
-                ContactSendingAdapter adapter = new ContactSendingAdapter(this, Defaults.loadContacts(this), 0);
+                ContactSendingAdapter adapter = new ContactSendingAdapter(this, Defaults.loadContacts(this));
                 if (mRecyclerView != null) {
                     mRecyclerView.setAdapter(adapter);
                     mRecyclerView.setLayoutManager(mLayoutManager);
@@ -294,6 +304,7 @@ public class MainActivity extends AppCompatActivity {
     public void setButtonViewContactInfo() {
         if (mSendingQueue.size() > 0) {
 
+            // Get selected names
             List<String> selectedNames = new ArrayList<>();
             for (int i = 0; i < mSendingQueue.size(); i++) {
 
@@ -304,14 +315,13 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
 
-            //mShareToTextView.setText(getResources().getString(R.string.share_to_text)
-            //+ " (" + mSendingQueue.size() + ")");
-
+            // Style the list
             String listOfNames = selectedNames.toString()
                     .replace("[", "")  //remove the right bracket
                     .replace("]", "")  //remove the left bracket
                     .trim();
 
+            // Set the text
             mShareToTextView.setText(getResources().getString(R.string.share_to_text)
                     + " " + listOfNames);
 
@@ -386,7 +396,7 @@ public class MainActivity extends AppCompatActivity {
         Defaults.storeContacts(this, contactList);
 
         // Set the adapter based on the most popular connections
-        ContactSendingAdapter adapter = new ContactSendingAdapter(this, contactList, ContactsActivity.numberOfContactsAdded);
+        ContactSendingAdapter adapter = new ContactSendingAdapter(this, contactList);
         if (mRecyclerView != null) {
             mRecyclerView.setAdapter(adapter);
             mRecyclerView.setLayoutManager(mLayoutManager);
@@ -509,8 +519,7 @@ public class MainActivity extends AppCompatActivity {
                 if (data.getBooleanExtra(CONTACT_CHANGE, false)) {
 
                     // Update the view
-                    ContactSendingAdapter adapter = new ContactSendingAdapter(this,
-                            Defaults.loadContacts(this), ContactsActivity.numberOfContactsAdded);
+                    ContactSendingAdapter adapter = new ContactSendingAdapter(this, Defaults.loadContacts(this));
                     mRecyclerView.setAdapter(adapter);
                     mRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -519,6 +528,7 @@ public class MainActivity extends AppCompatActivity {
                     mSendingQueue.clear();
                     setButtonViewContactInfo();
 
+                    // May want to use this for toggling to share with newly added users
                     ContactsActivity.numberOfContactsAdded = 0;
                 }
             }
