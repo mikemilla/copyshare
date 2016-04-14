@@ -8,4 +8,6 @@
     <string name="add_contact">Add Contact</string>
     <string name="edit_text_hint">Say Something…</string>
     <string name="share_to_text">Send copy to</string>
+    <string name="about">Created by Michael Miller</string>
+    <string name="rate">Rate this app</string>
 </resources>

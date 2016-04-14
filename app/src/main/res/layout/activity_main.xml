@@ -85,13 +85,6 @@
                         app:srcCompat="@drawable/ic_more_vert"
                         tools:ignore="MissingPrefix" />
 
-                    <Switch
-                        android:id="@+id/service_switch"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_alignParentRight="true"
-                        android:visibility="gone" />
-
                 </RelativeLayout>
 
                 <android.support.v7.widget.RecyclerView
@@ -127,8 +120,8 @@
                 <FrameLayout
                     android:id="@+id/action_button"
                     android:layout_width="match_parent"
-                    android:layout_height="66dp"
-                    android:foreground="?attr/selectableItemBackground">
+                    android:layout_height="@dimen/sixty_six"
+                    android:background="@drawable/button_cancel">
 
                     <com.mikemilla.copyshare.views.StyledTextView
                         android:id="@+id/action_text_view"

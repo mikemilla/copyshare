@@ -5,6 +5,7 @@ import android.app.ActivityManager;
 import android.content.ClipboardManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -18,20 +19,20 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private StyledTextView mCopiedTextView, mActionTextView, mShareToTextView;
     private StyledEditText mEditText;
     private CoordinatorLayout mCoordinatorLayout;
+    private Typeface typeface;
     private boolean didPressSend = false;
     private boolean SendSMS = true;
 
@@ -112,8 +114,16 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Start the service on load
+        if (!isServiceRunning(ClipboardService.class)) {
+            startService(new Intent(getBaseContext(), ClipboardService.class));
+        }
+
         // Load the animations
         createAnimations();
+
+        // Init the type face
+        typeface = Typeface.createFromAsset(MainActivity.this.getAssets(), getResources().getString(R.string.font));
 
         // Setup Bottom Sheet
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
@@ -129,7 +139,49 @@ public class MainActivity extends AppCompatActivity {
         mMoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "Dope", Toast.LENGTH_SHORT).show();
+
+                // Inflate the alert view
+                LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
+                final View dialogTitle = inflater.inflate(R.layout.dialog_about, null);
+
+                // Init Dialog Views
+                LinearLayout dialogRateButton = (LinearLayout) dialogTitle.findViewById(R.id.dialog_rate_button);
+                dialogRateButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("https://play.google.com/store/apps/details?id=com.mikemilla.wordnerd"));
+                        startActivity(browserIntent);
+                    }
+                });
+
+                LinearLayout dialogAboutButton = (LinearLayout) dialogTitle.findViewById(R.id.dialog_about_button);
+                dialogAboutButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.mikemilla.com"));
+                        startActivity(browserIntent);
+                    }
+                });
+
+                // Setup Dialog
+                final AlertDialog mDialog = new AlertDialog.Builder(MainActivity.this)
+                        .setCustomTitle(dialogTitle)
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                //
+                            }
+                        }).create();
+
+                // Show the dialog
+                mDialog.show();
+
+                // Change the dialog button text
+                mDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTypeface(typeface);
+                mDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setTextColor(
+                        ContextCompat.getColor(MainActivity.this, R.color.accent));
+
             }
         });
 
@@ -175,8 +227,7 @@ public class MainActivity extends AppCompatActivity {
                         // Change toast font
                         LinearLayout toastLayout = (LinearLayout) toast.getView();
                         TextView textView = (TextView) toastLayout.getChildAt(0);
-                        Typeface tf = Typeface.createFromAsset(MainActivity.this.getAssets(), getResources().getString(R.string.font));
-                        textView.setTypeface(tf);
+                        textView.setTypeface(typeface);
                         toast.show();
                     }
 
@@ -239,49 +290,24 @@ public class MainActivity extends AppCompatActivity {
         mActionTextView = (StyledTextView) findViewById(R.id.action_text_view);
         setButtonViewContactInfo();
 
-        // Switch
-        Switch mServiceSwitch = (Switch) findViewById(R.id.service_switch);
-        if (mServiceSwitch != null) {
+        // Populate to create the contact list
+        if (Defaults.loadContacts(this) == null) {
 
-            // Starts the service by default
-            mServiceSwitch.setChecked(true);
-            if (!isServiceRunning(ClipboardService.class)) {
-                startService(new Intent(getBaseContext(), ClipboardService.class));
+            /**
+             * Need proper checking
+             */
+            ActivityCompat.requestPermissions(MainActivity.this,
+                    new String[]{Manifest.permission.SEND_SMS,
+                            Manifest.permission.READ_CONTACTS,
+                            Manifest.permission.READ_CALL_LOG},
+                    0);
+
+        } else {
+            ContactSendingAdapter adapter = new ContactSendingAdapter(this, Defaults.loadContacts(this));
+            if (mRecyclerView != null) {
+                mRecyclerView.setAdapter(adapter);
+                mRecyclerView.setLayoutManager(mLayoutManager);
             }
-
-            // Populate to create the contact list
-            if (Defaults.loadContacts(this) == null) {
-
-                /**
-                 * Need proper checking
-                 */
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.SEND_SMS,
-                                Manifest.permission.READ_CONTACTS,
-                                Manifest.permission.READ_CALL_LOG},
-                        0);
-
-            } else {
-                ContactSendingAdapter adapter = new ContactSendingAdapter(this, Defaults.loadContacts(this));
-                if (mRecyclerView != null) {
-                    mRecyclerView.setAdapter(adapter);
-                    mRecyclerView.setLayoutManager(mLayoutManager);
-                }
-            }
-
-            // Listen to check changes
-            mServiceSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    if (isChecked) {
-                        startService(new Intent(getBaseContext(), ClipboardService.class));
-                    } else {
-                        if (isServiceRunning(ClipboardService.class)) {
-                            stopService(new Intent(getBaseContext(), ClipboardService.class));
-                        }
-                    }
-                }
-            });
         }
 
         // Animate first load
@@ -327,20 +353,28 @@ public class MainActivity extends AppCompatActivity {
 
 
             divider.setVisibility(View.GONE);
-            mEditText.setVisibility(View.VISIBLE);
+
+            // Show edit text if the view is not visible
+            if (mEditText.getVisibility() != View.VISIBLE) {
+                mEditText.setVisibility(View.VISIBLE);
+                mEditText.startAnimation(fadeIn);
+            }
+
             mActionButton.setOnClickListener(mSendClick);
-            mActionTextView.setText(R.string.send);
+            mActionButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button_send));
+
             mActionTextView.setText(R.string.send);
             mActionTextView.setTextColor(ContextCompat.getColor(this, R.color.white));
-            mActionTextView.setBackgroundColor(ContextCompat.getColor(this, R.color.accent));
         } else {
             mShareToTextView.setText(getResources().getString(R.string.share_to_text));
             divider.setVisibility(View.VISIBLE);
             mEditText.setVisibility(View.GONE);
+
             mActionButton.setOnClickListener(mCancelClick);
+            mActionButton.setBackground(ContextCompat.getDrawable(this, R.drawable.button_cancel));
+
             mActionTextView.setText(R.string.cancel);
             mActionTextView.setTextColor(ContextCompat.getColor(this, R.color.text_color));
-            mActionTextView.setBackgroundColor(ContextCompat.getColor(this, android.R.color.transparent));
         }
     }
 

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/seventy_two"
+        android:layout_marginTop="@dimen/eight"
+        android:orientation="horizontal"
+        android:padding="@dimen/sixteen">
+
+        <com.mikemilla.copyshare.views.StyledTextView
+            android:id="@+id/dialog_about_title"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="Copy Share"
+            android:textColor="@color/text_color"
+            android:textSize="20sp" />
+
+        <com.mikemilla.copyshare.views.StyledTextView
+            android:id="@+id/dialog_about_version"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical|right|end"
+            android:text="v1.0"
+            android:textColor="@color/border"
+            android:textSize="16sp" />
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="@color/border" />
+
+    <LinearLayout
+        android:id="@+id/dialog_about_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/edit_text_height_fix"
+        android:layout_marginTop="@dimen/eight"
+        android:background="?attr/selectableItemBackground"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/seventy_two"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_code"
+            tools:ignore="MissingPrefix" />
+
+        <com.mikemilla.copyshare.views.StyledTextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="@string/about"
+            android:textColor="@color/text_color"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/dialog_rate_button"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/edit_text_height_fix"
+        android:background="?attr/selectableItemBackground"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="@dimen/seventy_two"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            app:srcCompat="@drawable/ic_star"
+            tools:ignore="MissingPrefix" />
+
+        <com.mikemilla.copyshare.views.StyledTextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:text="@string/rate"
+            android:textColor="@color/text_color"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+</LinearLayout>

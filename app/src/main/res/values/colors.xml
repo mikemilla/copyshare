@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primaryDark">#D53C0B</color>
+    <color name="primary_dark">#D53C0B</color>
     <color name="primary">#F54A15</color>
     <color name="accent">#3D5AFE</color>
+    <color name="accent_dark">#304FFE</color>
     <color name="background">#BF000000</color>
     <color name="flat_shadow">#1A000000</color>
     <color name="ripple">#42000000</color>

@@ -41,7 +41,7 @@ public class ContactsActivity extends AppCompatActivity implements StyledSearchV
 
         // Status bar color
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.primaryDark));
+            getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.primary_dark));
         }
 
         // Add back button to action bar (Toolbar)
