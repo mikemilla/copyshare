@@ -55,37 +55,45 @@ public class ContactsActivity extends AppCompatActivity implements StyledSearchV
 
         // Add Contacts to the lists
         mModels = new ArrayList<>();
+        setupContactList();
+    }
+
+    /**
+     * Create the contacts list
+     */
+    private void setupContactList() {
+
         if (getContacts() != null) {
             for (ContactModel contact : getContacts()) {
                 mModels.add(new ContactModel(contact.getPicture(), contact.getName(), contact.getNumbers(), null));
             }
-        }
 
-        // Setup the recycler view and adapter
-        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
-        mAdapter = new ContactAddingAdapter(this, mModels);
-        mRecyclerView.setAdapter(mAdapter);
+            // Setup the recycler view and adapter
+            mRecyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+            mAdapter = new ContactAddingAdapter(this, mModels);
+            mRecyclerView.setAdapter(mAdapter);
 
-        // Setup Fast Scroll Bar
-        fastScroller = (RecyclerViewFastScroller) findViewById(R.id.fastscroller);
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false) {
-            @Override
-            public void onLayoutChildren(final RecyclerView.Recycler recycler, final RecyclerView.State state) {
-                super.onLayoutChildren(recycler, state);
-                final int firstVisibleItemPosition = findFirstVisibleItemPosition();
-                if (firstVisibleItemPosition != 0) {
-                    if (firstVisibleItemPosition == -1) {
-                        fastScroller.setVisibility(View.GONE);
+            // Setup Fast Scroll Bar
+            fastScroller = (RecyclerViewFastScroller) findViewById(R.id.fastscroller);
+            mRecyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false) {
+                @Override
+                public void onLayoutChildren(final RecyclerView.Recycler recycler, final RecyclerView.State state) {
+                    super.onLayoutChildren(recycler, state);
+                    final int firstVisibleItemPosition = findFirstVisibleItemPosition();
+                    if (firstVisibleItemPosition != 0) {
+                        if (firstVisibleItemPosition == -1) {
+                            fastScroller.setVisibility(View.GONE);
+                        }
+                        return;
                     }
-                    return;
+                    final int lastVisibleItemPosition = findLastVisibleItemPosition();
+                    int itemsShown = lastVisibleItemPosition - firstVisibleItemPosition + 1;
+                    fastScroller.setVisibility(mAdapter.getItemCount() > itemsShown ? View.VISIBLE : View.GONE);
                 }
-                final int lastVisibleItemPosition = findLastVisibleItemPosition();
-                int itemsShown = lastVisibleItemPosition - firstVisibleItemPosition + 1;
-                fastScroller.setVisibility(mAdapter.getItemCount() > itemsShown ? View.VISIBLE : View.GONE);
-            }
-        });
-        fastScroller.setRecyclerView(mRecyclerView);
-        fastScroller.setViewsToUse(R.layout.fast_scroller, R.id.fastscroller_bubble, R.id.fastscroller_handle);
+            });
+            fastScroller.setRecyclerView(mRecyclerView);
+            fastScroller.setViewsToUse(R.layout.fast_scroller, R.id.fastscroller_bubble, R.id.fastscroller_handle);
+        }
     }
 
     @Override
@@ -135,7 +143,7 @@ public class ContactsActivity extends AppCompatActivity implements StyledSearchV
     public boolean onOptionsItemSelected(MenuItem item) {
         // back button press
         if (item.getItemId() == android.R.id.home) {
-            finish();
+            onBackPressed();
         }
         return super.onOptionsItemSelected(item);
     }

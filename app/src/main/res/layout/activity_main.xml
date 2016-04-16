@@ -71,6 +71,7 @@
                         android:paddingRight="@dimen/sixteen"
                         android:paddingTop="@dimen/eight"
                         android:singleLine="true"
+                        android:text="@string/nothing_copied"
                         android:textColor="@color/ripple"
                         android:textSize="14sp" />
 
@@ -96,7 +97,6 @@
                     android:id="@+id/edit_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="start|center_vertical"
                     android:layout_marginBottom="@dimen/eight"
                     android:layout_marginLeft="@dimen/eight"
                     android:layout_marginRight="@dimen/eight"
@@ -105,8 +105,7 @@
                     android:inputType="textCapSentences|textAutoCorrect|textMultiLine"
                     android:maxHeight="@dimen/eighty_eight"
                     android:minHeight="@dimen/fifty_two"
-                    android:paddingLeft="@dimen/sixteen"
-                    android:paddingRight="@dimen/sixteen"
+                    android:padding="@dimen/sixteen"
                     android:scrollbars="vertical"
                     android:textColorHint="@color/ripple"
                     android:textSize="16sp" />

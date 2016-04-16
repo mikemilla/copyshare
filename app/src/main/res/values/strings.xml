@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CopyShare</string>
+    <string name="app_name">Copy Share</string>
     <string name="send">Send SMS</string>
     <string name="cancel">Cancel</string>
     <string name="search_contacts">Search Contacts</string>
@@ -10,4 +10,6 @@
     <string name="share_to_text">Send copy to</string>
     <string name="about">Created by Michael Miller</string>
     <string name="rate">Rate this app</string>
+    <string name="show_contacts">Show Contacts</string>
+    <string name="nothing_copied">Nothing is copied</string>
 </resources>

@@ -1,10 +1,12 @@
 package com.mikemilla.copyshare.lists;
 
+import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.database.Cursor;
@@ -15,6 +17,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Vibrator;
 import android.provider.ContactsContract;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -105,9 +108,19 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent();
-                    intent.setClass(mMainActivity, ContactsActivity.class);
-                    mMainActivity.startActivityForResult(intent, 1); // For sending if there is a change back to main
+                    if (ActivityCompat.checkSelfPermission(mMainActivity,
+                            Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+                        Intent intent = new Intent();
+                        intent.setClass(mMainActivity, ContactsActivity.class);
+                        mMainActivity.startActivityForResult(intent, 1); // For sending if there is a change back to main
+                    } else {
+
+                        mMainActivity.didPressAddContact = true;
+
+                        // Request permissions
+                        ActivityCompat.requestPermissions(mMainActivity,
+                                new String[]{Manifest.permission.READ_CONTACTS}, 0);
+                    }
                 }
             });
         }
@@ -212,7 +225,7 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
                         }
 
                         // Update the UI
-                        mMainActivity.setButtonViewContactInfo();
+                        mMainActivity.updateUI();
 
                     }
                 });
@@ -300,7 +313,7 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
                                         item.removeAt(i);
                                         Defaults.storeContacts(mMainActivity, updatedContactList);
 
-                                        mMainActivity.setButtonViewContactInfo();
+                                        mMainActivity.updateUI();
                                     }
                                 }).create();
 

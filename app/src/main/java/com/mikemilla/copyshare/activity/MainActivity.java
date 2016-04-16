@@ -9,8 +9,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.CallLog;
 import android.provider.ContactsContract;
@@ -24,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -36,6 +39,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mikemilla.copyshare.BuildConfig;
 import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.data.ContactModel;
 import com.mikemilla.copyshare.data.Defaults;
@@ -65,7 +69,8 @@ public class MainActivity extends AppCompatActivity {
     private CoordinatorLayout mCoordinatorLayout;
     private Typeface typeface;
     private boolean didPressSend = false;
-    private boolean SendSMS = true;
+    public boolean didPressAddContact = false;
+    private boolean SendSMS = false;
 
     public List<Integer> selectedIndexes = new ArrayList<>();
     public List<ContactModel> mSendingQueue = new ArrayList<>();
@@ -83,31 +88,72 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
 
-            // Update the contact list order
-            List<ContactModel> updatedContactList = Defaults.loadContacts(MainActivity.this);
+            // Pressed the send button
+            didPressSend = true;
+
+            // Check SMS Permissions
+            if (ContextCompat.checkSelfPermission(MainActivity.this,
+                    Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
+
+                // Send SMS
+                sendSMS();
+
+            } else {
+
+                // Request SMS
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.SEND_SMS}, 0);
+            }
+        }
+    };
+
+    /**
+     * Sends the SMS and closes the view
+     */
+    private void sendSMS() {
+
+        // Update the contact list order
+        List<ContactModel> updatedContactList = Defaults.loadContacts(MainActivity.this);
+
+        // Odd bug that happens when removing and scrolling
+        try {
             for (int i = 0; i < selectedIndexes.size(); i++) {
                 int index = selectedIndexes.get(i);
                 if (updatedContactList != null) {
                     updatedContactList.remove(index);
+                    updatedContactList.get(0).setSelected(false);
                     updatedContactList.add(0, mSendingQueue.get(i));
                     updatedContactList.get(0).setSelected(false);
                 }
             }
             Defaults.storeContacts(MainActivity.this, updatedContactList);
+        } catch (Exception e) {
+            Log.e("Index Issue", e.toString());
+        }
 
-            // Close Bottom Sheet
-            mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
-            didPressSend = true;
+        // Close Bottom Sheet
+        mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-            // Send SMS
-            for (int i = 0; i < mSendingQueue.size(); i++) {
-                if (SendSMS) {
+        for (int i = 0; i < mSendingQueue.size(); i++) {
+            if (SendSMS) {
+
+                if (mCopiedTextView.getText() == null
+                        || mCopiedTextView.getText().equals("")
+                        || mCopiedTextView.getText().equals(getResources().getString(R.string.nothing_copied))) {
+
+                    // No text was copied
+                    SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
+                            mEditText.getText().toString(), null, null);
+
+                } else {
+
+                    // Something was copied
                     SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
                             mCopiedTextView.getText().toString() + " " + mEditText.getText().toString(), null, null);
                 }
             }
         }
-    };
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -129,6 +175,12 @@ public class MainActivity extends AppCompatActivity {
         mCoordinatorLayout = (CoordinatorLayout) findViewById(R.id.coordinator_layout);
         background = findViewById(R.id.background);
         mBottomSheet = (FrameLayout) (mCoordinatorLayout != null ? mCoordinatorLayout.findViewById(R.id.bottom_sheet) : null);
+
+        // Populate to create the contact list
+        if (Defaults.loadContacts(this) == null) {
+            mBottomSheet.setVisibility(View.GONE);
+        }
+
         assert mBottomSheet != null;
         mBottomSheetBehavior = BottomSheetBehavior.from(mBottomSheet);
 
@@ -164,6 +216,9 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+                StyledTextView versionNumber = (StyledTextView) dialogTitle.findViewById(R.id.dialog_about_version);
+                versionNumber.setText("v" + BuildConfig.VERSION_NAME);
+
                 // Setup Dialog
                 final AlertDialog mDialog = new AlertDialog.Builder(MainActivity.this)
                         .setCustomTitle(dialogTitle)
@@ -189,6 +244,7 @@ public class MainActivity extends AppCompatActivity {
         background.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                didPressSend = false;
                 mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
         });
@@ -200,6 +256,31 @@ public class MainActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 mBottomSheetBehavior.setPeekHeight(mBottomSheet.getMeasuredHeight()
                         + (int) getResources().getDimension(R.dimen.edit_text_height_fix));
+            }
+        });
+
+        // Detect keyboard changes
+        mCoordinatorLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+
+                Rect r = new Rect();
+                mCoordinatorLayout.getWindowVisibleDisplayFrame(r);
+                int screenHeight = mCoordinatorLayout.getRootView().getHeight();
+
+                // r.bottom is the position above soft keypad or device button.
+                // if keypad is shown, the r.bottom is smaller than that before.
+                int keypadHeight = screenHeight - r.bottom;
+                Log.d("keypadHeight", "" + keypadHeight);
+
+                // 0.15 ratio is perhaps enough to determine keypad height.
+                if (keypadHeight > screenHeight * 0.15) {
+                    mEditText.setCursorVisible(true);
+                    mEditText.requestFocus();
+                } else {
+                    mEditText.setCursorVisible(false);
+                    mEditText.clearFocus();
+                }
             }
         });
 
@@ -257,6 +338,16 @@ public class MainActivity extends AppCompatActivity {
         // Setup the edit text
         mEditText = (StyledEditText) findViewById(R.id.edit_text);
 
+        // Always set cursor at end of view
+        mEditText.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+            @Override
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    mEditText.setSelection(mEditText.getText().length());
+                }
+            }
+        });
+
         // Allow edit text to scroll in the bottoms sheet
         mEditText.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -288,21 +379,24 @@ public class MainActivity extends AppCompatActivity {
         // Text View as Button
         mActionButton = (FrameLayout) findViewById(R.id.action_button);
         mActionTextView = (StyledTextView) findViewById(R.id.action_text_view);
-        setButtonViewContactInfo();
+        updateUI();
 
         // Populate to create the contact list
         if (Defaults.loadContacts(this) == null) {
 
-            /**
-             * Need proper checking
-             */
-            ActivityCompat.requestPermissions(MainActivity.this,
-                    new String[]{Manifest.permission.SEND_SMS,
-                            Manifest.permission.READ_CONTACTS,
-                            Manifest.permission.READ_CALL_LOG},
-                    0);
+            // Check permissions
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.READ_CONTACTS,
+                                Manifest.permission.READ_CALL_LOG},
+                        0);
+            } else {
+                searchAndDisplay(getMostPopularContacts());
+            }
 
         } else {
+
+            // We have contacts, so display them
             ContactSendingAdapter adapter = new ContactSendingAdapter(this, Defaults.loadContacts(this));
             if (mRecyclerView != null) {
                 mRecyclerView.setAdapter(adapter);
@@ -311,8 +405,10 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // Animate first load
-        mBottomSheet.setAnimation(slideUp);
-        background.setAnimation(fadeIn);
+        if (Defaults.loadContacts(this) != null) {
+            mBottomSheet.setAnimation(slideUp);
+            background.setAnimation(fadeIn);
+        }
 
     }
 
@@ -327,7 +423,15 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Sets button status and text areas
      */
-    public void setButtonViewContactInfo() {
+    public void updateUI() {
+
+        // Check the copied text
+        if (mCopiedTextView.getText() == null
+                || mCopiedTextView.getText().equals("")
+                || mCopiedTextView.getText().equals(getResources().getString(R.string.nothing_copied))) {
+            mCopiedTextView.setText(getResources().getString(R.string.nothing_copied));
+        }
+
         if (mSendingQueue.size() > 0) {
 
             // Get selected names
@@ -351,7 +455,6 @@ public class MainActivity extends AppCompatActivity {
             mShareToTextView.setText(getResources().getString(R.string.share_to_text)
                     + " " + listOfNames);
 
-
             divider.setVisibility(View.GONE);
 
             // Show edit text if the view is not visible
@@ -365,6 +468,7 @@ public class MainActivity extends AppCompatActivity {
 
             mActionTextView.setText(R.string.send);
             mActionTextView.setTextColor(ContextCompat.getColor(this, R.color.white));
+
         } else {
             mShareToTextView.setText(getResources().getString(R.string.share_to_text));
             divider.setVisibility(View.VISIBLE);
@@ -435,19 +539,55 @@ public class MainActivity extends AppCompatActivity {
             mRecyclerView.setAdapter(adapter);
             mRecyclerView.setLayoutManager(mLayoutManager);
         }
+
+        // Set view to visible and slide up
+        mBottomSheet.setVisibility(View.VISIBLE);
+        mBottomSheet.startAnimation(slideUp);
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
+        // Create the list when we have permission
+        if (Defaults.loadContacts(MainActivity.this) == null) {
+            searchAndDisplay(getMostPopularContacts());
+        }
+
+        // Send SMS if they give it on allow send
+        if (didPressSend) {
+
+            if (ContextCompat.checkSelfPermission(MainActivity.this,
+                    Manifest.permission.SEND_SMS) == PackageManager.PERMISSION_GRANTED) {
+
+                // Send SMS
+                sendSMS();
+            }
+        }
+
+        // Open Contacts if allowed to
+        if (didPressAddContact) {
+            didPressAddContact = false;
+
+            if (ActivityCompat.checkSelfPermission(MainActivity.this,
+                    Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+                Intent intent = new Intent();
+                intent.setClass(MainActivity.this, ContactsActivity.class);
+                startActivityForResult(intent, 1); // For sending if there is a change back to main
+            }
+        }
+
+    }
+
+    private ArrayList<String> getMostPopularContacts() {
+
+        ArrayList<String> allNumbers = new ArrayList<>();
+
         if (ContextCompat.checkSelfPermission(MainActivity.this,
-                Manifest.permission.READ_CALL_LOG)
-                == PackageManager.PERMISSION_GRANTED) {
+                Manifest.permission.READ_CALL_LOG) == PackageManager.PERMISSION_GRANTED) {
 
             // Check all contacts to get most popular connections
             Date date = new Date();
-            ArrayList<String> allNumbers = new ArrayList<>();
             Cursor c = getContentResolver().query(
                     CallLog.Calls.CONTENT_URI,
                     null,
@@ -482,13 +622,12 @@ public class MainActivity extends AppCompatActivity {
 
                     c.moveToNext();
                 }
-            }
 
-            // Send this list to a new method
-            // For sorting
-            searchAndDisplay(allNumbers);
+                c.close();
+            }
         }
 
+        return allNumbers;
     }
 
     /**
@@ -499,21 +638,26 @@ public class MainActivity extends AppCompatActivity {
      */
     public String getContactName(String phoneNumber) {
 
-        ContentResolver cr = this.getContentResolver();
-        Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
-        Cursor cursor = cr.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
-
-        if (cursor == null) {
-            return null;
-        }
-
         String contactName = null;
-        if (cursor.moveToFirst()) {
-            contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
-        }
 
-        if (!cursor.isClosed()) {
-            cursor.close();
+        if (ContextCompat.checkSelfPermission(MainActivity.this,
+                Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+
+            ContentResolver cr = this.getContentResolver();
+            Uri uri = Uri.withAppendedPath(ContactsContract.PhoneLookup.CONTENT_FILTER_URI, Uri.encode(phoneNumber));
+            Cursor cursor = cr.query(uri, new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME}, null, null, null);
+
+            if (cursor == null) {
+                return null;
+            }
+
+            if (cursor.moveToFirst()) {
+                contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.PhoneLookup.DISPLAY_NAME));
+            }
+
+            if (!cursor.isClosed()) {
+                cursor.close();
+            }
         }
 
         return contactName;
@@ -560,7 +704,7 @@ public class MainActivity extends AppCompatActivity {
                     // Remove the lists and update UI
                     selectedIndexes.clear();
                     mSendingQueue.clear();
-                    setButtonViewContactInfo();
+                    updateUI();
 
                     // May want to use this for toggling to share with newly added users
                     ContactsActivity.numberOfContactsAdded = 0;

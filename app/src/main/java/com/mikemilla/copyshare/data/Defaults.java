@@ -28,7 +28,7 @@ public class Defaults {
         Gson gson = new Gson();
         String jsonContacts = gson.toJson(contacts);
         editor.putString(CONTACTS, jsonContacts);
-        editor.commit();
+        editor.apply();
     }
 
     public static List<ContactModel> loadContacts(Context context) {
