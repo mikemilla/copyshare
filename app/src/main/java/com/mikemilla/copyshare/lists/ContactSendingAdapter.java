@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
 import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.activity.ContactsActivity;
 import com.mikemilla.copyshare.activity.MainActivity;
@@ -110,6 +111,13 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
                 public void onClick(View v) {
                     if (ActivityCompat.checkSelfPermission(mMainActivity,
                             Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+
+                        // Google analytic
+                        mMainActivity.mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory("Action")
+                                .setAction("Add Contact Clicks")
+                                .build());
+
                         Intent intent = new Intent();
                         intent.setClass(mMainActivity, ContactsActivity.class);
                         mMainActivity.startActivityForResult(intent, 1); // For sending if there is a change back to main
@@ -235,6 +243,12 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
                     @Override
                     public boolean onLongClick(View v) {
 
+                        // Google analytic
+                        mMainActivity.mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory("Action")
+                                .setAction("Contact Long Press")
+                                .build());
+
                         // Little vibrate
                         Vibrator vibrate = (Vibrator) mMainActivity.getSystemService(Context.VIBRATOR_SERVICE);
                         vibrate.vibrate(20);
@@ -290,6 +304,12 @@ public class ContactSendingAdapter extends RecyclerView.Adapter {
                                 .setPositiveButton("Remove", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
+
+                                        // Google analytic
+                                        mMainActivity.mTracker.send(new HitBuilders.EventBuilder()
+                                                .setCategory("Action")
+                                                .setAction("Contact Removed")
+                                                .build());
 
                                         // Create the styled toast
                                         Toast toast = Toast.makeText(mMainActivity,

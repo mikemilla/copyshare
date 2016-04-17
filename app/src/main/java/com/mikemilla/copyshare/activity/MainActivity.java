@@ -39,9 +39,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 import com.mikemilla.copyshare.BuildConfig;
 import com.mikemilla.copyshare.R;
 import com.mikemilla.copyshare.data.ContactModel;
+import com.mikemilla.copyshare.data.CopyShareApplication;
 import com.mikemilla.copyshare.data.Defaults;
 import com.mikemilla.copyshare.data.FrequentContactAmount;
 import com.mikemilla.copyshare.lists.ContactSendingAdapter;
@@ -57,6 +60,10 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     public static String CONTACT_CHANGE = "CONTACT_CHANGE";
+    public Tracker mTracker;
+    public boolean didPressAddContact = false;
+    public List<Integer> selectedIndexes = new ArrayList<>();
+    public List<ContactModel> mSendingQueue = new ArrayList<>();
 
     private Animation slideUp, fadeIn;
     private View background, divider;
@@ -69,16 +76,19 @@ public class MainActivity extends AppCompatActivity {
     private CoordinatorLayout mCoordinatorLayout;
     private Typeface typeface;
     private boolean didPressSend = false;
-    public boolean didPressAddContact = false;
     private boolean SendSMS = false;
-
-    public List<Integer> selectedIndexes = new ArrayList<>();
-    public List<ContactModel> mSendingQueue = new ArrayList<>();
 
     // Handle the clicks depending on data provided
     View.OnClickListener mCancelClick = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
+
+            // Google analytic
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("Action")
+                    .setAction("Cancel Button Click")
+                    .build());
+
             mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
         }
     };
@@ -137,6 +147,12 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < mSendingQueue.size(); i++) {
             if (SendSMS) {
 
+                // Google analytic
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("Action")
+                        .setAction("Sent SMS Copy to (" + mSendingQueue.size() + ")")
+                        .build());
+
                 if (mCopiedTextView.getText() == null
                         || mCopiedTextView.getText().equals("")
                         || mCopiedTextView.getText().equals(getResources().getString(R.string.nothing_copied))) {
@@ -165,6 +181,10 @@ public class MainActivity extends AppCompatActivity {
             startService(new Intent(getBaseContext(), ClipboardService.class));
         }
 
+        // Google Analytics
+        CopyShareApplication application = (CopyShareApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+
         // Load the animations
         createAnimations();
 
@@ -192,6 +212,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                // Google analytic
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("Action")
+                        .setAction("More Button Click")
+                        .build());
+
                 // Inflate the alert view
                 LayoutInflater inflater = LayoutInflater.from(MainActivity.this);
                 final View dialogTitle = inflater.inflate(R.layout.dialog_about, null);
@@ -201,6 +227,13 @@ public class MainActivity extends AppCompatActivity {
                 dialogRateButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
+                        // Google analytic
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory("Action")
+                                .setAction("Rate App Button Click")
+                                .build());
+
                         Intent browserIntent = new Intent(Intent.ACTION_VIEW,
                                 Uri.parse("https://play.google.com/store/apps/details?id=com.mikemilla.wordnerd"));
                         startActivity(browserIntent);
@@ -211,6 +244,13 @@ public class MainActivity extends AppCompatActivity {
                 dialogAboutButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
+
+                        // Google analytic
+                        mTracker.send(new HitBuilders.EventBuilder()
+                                .setCategory("Action")
+                                .setAction("About Me Button Click")
+                                .build());
+
                         Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.mikemilla.com"));
                         startActivity(browserIntent);
                     }
@@ -244,6 +284,13 @@ public class MainActivity extends AppCompatActivity {
         background.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                // Google analytic
+                mTracker.send(new HitBuilders.EventBuilder()
+                        .setCategory("Action")
+                        .setAction("Background Cancel Click")
+                        .build());
+
                 didPressSend = false;
                 mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
             }
@@ -372,7 +419,7 @@ public class MainActivity extends AppCompatActivity {
                 String copy = clipBoard.getPrimaryClip().getItemAt(0).getText().toString();
                 mCopiedTextView.setText(copy);
             } else {
-                mCopiedTextView.setText("Nothing Copied :(");
+                mCopiedTextView.setText(getResources().getString(R.string.nothing_copied));
             }
         }
 
@@ -533,6 +580,12 @@ public class MainActivity extends AppCompatActivity {
         // Set Default contact list
         Defaults.storeContacts(this, contactList);
 
+        // Google analytic
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("Generated Popular Contacts List (" + contactList.size() + ")")
+                .build());
+
         // Set the adapter based on the most popular connections
         ContactSendingAdapter adapter = new ContactSendingAdapter(this, contactList);
         if (mRecyclerView != null) {
@@ -681,6 +734,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+
+        // Google analytic
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Action")
+                .setAction("Back Button Press")
+                .build());
+
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
     }
 

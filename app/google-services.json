@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_id": "copy-share",
+    "project_number": "55260009274",
+    "name": "Copy Share"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:55260009274:android:37cd5b8a200ac71c",
+        "client_id": "android:com.mikemilla.copyshare",
+        "client_type": 1,
+        "android_client_info": {
+          "package_name": "com.mikemilla.copyshare",
+          "certificate_hash": []
+        }
+      },
+      "oauth_client": [],
+      "api_key": [],
+      "services": {
+        "analytics_service": {
+          "status": 2,
+          "analytics_property": {
+            "tracking_id": "UA-51859037-5"
+          }
+        },
+        "cloud_messaging_service": {
+          "status": 1,
+          "apns_config": []
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "google_signin_service": {
+          "status": 1
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "client_info": [],
+  "ARTIFACT_VERSION": "1"
+}
