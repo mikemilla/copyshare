@@ -67,7 +67,7 @@ public class ContactModel {
 
     private int setRandomInt() {
         int min = 0;
-        int max = 6 - 1;
+        int max = 5 - 1;
         Random r = new Random();
         return r.nextInt(max - min + 1) + min;
     }

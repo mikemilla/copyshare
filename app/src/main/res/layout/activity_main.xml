@@ -44,7 +44,7 @@
                     android:layout_marginBottom="2dp">
 
                     <com.mikemilla.copyshare.views.StyledTextView
-                        android:id="@+id/share_with_tip"
+                        android:id="@+id/copied_text_view"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_toLeftOf="@+id/more_button"
@@ -54,26 +54,26 @@
                         android:paddingRight="@dimen/sixteen"
                         android:paddingTop="@dimen/sixteen"
                         android:singleLine="true"
-                        android:text="@string/share_to_text"
-                        android:textColor="@color/text_color"
-                        android:textSize="18sp" />
+                        android:text="@string/nothing_copied"
+                        android:textColor="@color/ripple"
+                        android:textSize="14sp" />
 
                     <com.mikemilla.copyshare.views.StyledTextView
-                        android:id="@+id/copied_text_view"
+                        android:id="@+id/share_with_tip"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_below="@+id/share_with_tip"
+                        android:layout_below="@+id/copied_text_view"
                         android:layout_toLeftOf="@+id/more_button"
                         android:ellipsize="end"
                         android:gravity="center_vertical"
                         android:paddingBottom="@dimen/sixteen"
                         android:paddingLeft="@dimen/sixteen"
                         android:paddingRight="@dimen/sixteen"
-                        android:paddingTop="@dimen/eight"
+                        android:paddingTop="6dp"
                         android:singleLine="true"
-                        android:text="@string/nothing_copied"
-                        android:textColor="@color/ripple"
-                        android:textSize="14sp" />
+                        android:text="@string/share_to_text"
+                        android:textColor="@color/text_color"
+                        android:textSize="18sp" />
 
                     <ImageView
                         android:id="@+id/more_button"

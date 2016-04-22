@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private CoordinatorLayout mCoordinatorLayout;
     private Typeface typeface;
     private boolean didPressSend = false;
-    private boolean SendSMS = false;
+    private boolean SendSMS = true;
 
     // Handle the clicks depending on data provided
     View.OnClickListener mCancelClick = new View.OnClickListener() {
@@ -158,8 +158,12 @@ public class MainActivity extends AppCompatActivity {
                         || mCopiedTextView.getText().equals(getResources().getString(R.string.nothing_copied))) {
 
                     // No text was copied
-                    SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
-                            mEditText.getText().toString(), null, null);
+                    try {
+                        SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
+                                mEditText.getText().toString(), null, null);
+                    } catch (Exception e) {
+                        Log.d("Exception", e.toString());
+                    }
 
                 } else {
 
@@ -318,7 +322,7 @@ public class MainActivity extends AppCompatActivity {
                 // r.bottom is the position above soft keypad or device button.
                 // if keypad is shown, the r.bottom is smaller than that before.
                 int keypadHeight = screenHeight - r.bottom;
-                Log.d("keypadHeight", "" + keypadHeight);
+                //Log.d("keypadHeight", "" + keypadHeight);
 
                 // 0.15 ratio is perhaps enough to determine keypad height.
                 if (keypadHeight > screenHeight * 0.15) {

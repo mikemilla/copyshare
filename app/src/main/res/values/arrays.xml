@@ -2,10 +2,9 @@
 <resources>
     <array name="circles">
         <item>@drawable/circle_green</item>
-        <item>@drawable/circle_blue</item>
+        <item>@drawable/circle_orange</item>
         <item>@drawable/circle_red</item>
         <item>@drawable/circle_cyan</item>
         <item>@drawable/circle_purple</item>
-        <item>@drawable/circle_red</item>
     </array>
 </resources>
