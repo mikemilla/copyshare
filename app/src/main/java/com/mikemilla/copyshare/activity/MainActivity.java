@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity {
                                 .build());
 
                         Intent browserIntent = new Intent(Intent.ACTION_VIEW,
-                                Uri.parse("https://play.google.com/store/apps/details?id=com.mikemilla.wordnerd"));
+                                Uri.parse("https://play.google.com/store/apps/details?id=com.mikemilla.copyshare"));
                         startActivity(browserIntent);
                     }
                 });
