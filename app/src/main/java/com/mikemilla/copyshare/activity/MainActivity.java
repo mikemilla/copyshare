@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private CoordinatorLayout mCoordinatorLayout;
     private Typeface typeface;
     private boolean didPressSend = false;
-    private boolean SendSMS = true;
+    private boolean SendSMS = false;
 
     // Handle the clicks depending on data provided
     View.OnClickListener mCancelClick = new View.OnClickListener() {
