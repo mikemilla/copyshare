@@ -2,7 +2,9 @@
 An Instagram like share sheet for anything you copy
 
 
-![alt tag](https://raw.githubusercontent.com/mikemilla/wordnerd-ios/master/screenshot.gif)
+![alt tag](https://raw.githubusercontent.com/mikemilla/copyshare/master/screen_shot_1.png)
+![alt tag](https://raw.githubusercontent.com/mikemilla/copyshare/master/screen_shot_1.png)
+![alt tag](https://raw.githubusercontent.com/mikemilla/copyshare/master/screen_shot_3.png)
 
 
 ## Download
