@@ -3,7 +3,7 @@ An Instagram like share sheet for anything you copy
 
 
 ![alt tag](https://raw.githubusercontent.com/mikemilla/copyshare/master/screen_shot_1.png)
-![alt tag](https://raw.githubusercontent.com/mikemilla/copyshare/master/screen_shot_1.png)
+![alt tag](https://raw.githubusercontent.com/mikemilla/copyshare/master/screen_shot_2.png)
 ![alt tag](https://raw.githubusercontent.com/mikemilla/copyshare/master/screen_shot_3.png)
 
 
