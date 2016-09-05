@@ -25,6 +25,7 @@
             android:clickable="true"
             android:elevation="8dp"
             android:onClick="@null"
+            app:behavior_peekHeight="268dp"
             app:behavior_hideable="true"
             app:layout_behavior="android.support.design.widget.BottomSheetBehavior">
 
