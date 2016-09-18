@@ -37,6 +37,7 @@
         <activity
             android:name=".activity.MainActivity"
             android:excludeFromRecents="true"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.Transparent"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -47,6 +48,7 @@
 
         <activity
             android:name=".activity.ContactsActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar" />
 
     </application>

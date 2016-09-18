@@ -76,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
     private CoordinatorLayout mCoordinatorLayout;
     private Typeface typeface;
     private boolean didPressSend = false;
-    private boolean SendSMS = false;
 
     // Handle the clicks depending on data provided
     View.OnClickListener mCancelClick = new View.OnClickListener() {
@@ -144,33 +143,40 @@ public class MainActivity extends AppCompatActivity {
         // Close Bottom Sheet
         mBottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
+        // Loop through "queue" and send sms
         for (int i = 0; i < mSendingQueue.size(); i++) {
-            if (SendSMS) {
 
-                // Google analytic
-                mTracker.send(new HitBuilders.EventBuilder()
-                        .setCategory("Action")
-                        .setAction("Sent SMS Copy to (" + mSendingQueue.size() + ")")
-                        .build());
+            // Google analytic
+            mTracker.send(new HitBuilders.EventBuilder()
+                    .setCategory("Action")
+                    .setAction("Sent SMS Copy to (" + mSendingQueue.size() + ")")
+                    .build());
 
-                if (mCopiedTextView.getText() == null
-                        || mCopiedTextView.getText().equals("")
-                        || mCopiedTextView.getText().equals(getResources().getString(R.string.nothing_copied))) {
+            if (mCopiedTextView.getText() == null
+                    || mCopiedTextView.getText().equals("")
+                    || mCopiedTextView.getText().equals(getResources().getString(R.string.nothing_copied))) {
 
-                    // No text was copied
-                    try {
-                        SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
-                                mEditText.getText().toString(), null, null);
-                    } catch (Exception e) {
-                        Log.d("Exception", e.toString());
-                    }
-
-                } else {
-
-                    // Something was copied
-                    SmsManager.getDefault().sendTextMessage(mSendingQueue.get(i).getNumber(), null,
-                            mCopiedTextView.getText().toString() + " " + mEditText.getText().toString(), null, null);
+                // No text was copied
+                try {
+                    SmsManager.getDefault().sendTextMessage(
+                            mSendingQueue.get(i).getNumber(),
+                            null,
+                            mEditText.getText().toString(),
+                            null,
+                            null);
+                } catch (Exception e) {
+                    Log.d("Exception", e.toString());
                 }
+
+            } else {
+
+                // Something was copied
+                SmsManager.getDefault().sendTextMessage(
+                        mSendingQueue.get(i).getNumber(),
+                        null,
+                        mCopiedTextView.getText().toString() + " " + mEditText.getText().toString(),
+                        null,
+                        null);
             }
         }
     }
@@ -460,7 +466,6 @@ public class MainActivity extends AppCompatActivity {
             mBottomSheet.setAnimation(slideUp);
             background.setAnimation(fadeIn);
         }
-
     }
 
     /**
